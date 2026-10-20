@@ -25,6 +25,16 @@ class MenuActivity : AppCompatActivity() {
             startActivity(Intent(this, MemoryActivity::class.java))
         }
 
+        findViewById<Button>(R.id.playRps).setOnClickListener {
+            Feedback.tap(this)
+            startActivity(Intent(this, RockPaperScissorsActivity::class.java))
+        }
+
+        findViewById<Button>(R.id.playGuess).setOnClickListener {
+            Feedback.tap(this)
+            startActivity(Intent(this, GuessNumberActivity::class.java))
+        }
+
         soundButton.setOnClickListener {
             Feedback.setEnabled(this, !Feedback.enabled(this))
             Feedback.tap(this)

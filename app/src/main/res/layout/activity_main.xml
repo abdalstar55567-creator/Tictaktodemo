@@ -16,16 +16,16 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="XO Zoom"
-            android:textColor="@color/text_main"
-            android:textSize="32sp"
+            android:text="100+"
+            android:textColor="@color/gold"
+            android:textSize="34sp"
             android:textStyle="bold" />
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="14dp"
-            android:text="لعبة إكس أو"
+            android:text="❌⭕ لعبة إكس أو"
             android:textColor="@color/text_dim"
             android:textSize="15sp" />
 
@@ -33,7 +33,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal">
-
             <TextView
                 android:id="@+id/scoreX"
                 android:layout_width="0dp"
@@ -46,7 +45,6 @@
                 android:textColor="@color/x_color"
                 android:textSize="17sp"
                 android:textStyle="bold" />
-
             <TextView
                 android:id="@+id/scoreDraw"
                 android:layout_width="0dp"
@@ -59,7 +57,6 @@
                 android:textColor="@color/text_dim"
                 android:textSize="17sp"
                 android:textStyle="bold" />
-
             <TextView
                 android:id="@+id/scoreO"
                 android:layout_width="0dp"
@@ -95,7 +92,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:orientation="horizontal">
-
             <Button
                 android:id="@+id/restartButton"
                 android:layout_width="0dp"
@@ -105,7 +101,6 @@
                 android:background="@drawable/bg_button"
                 android:text="جولة جديدة"
                 android:textColor="@color/text_main" />
-
             <Button
                 android:id="@+id/modeButton"
                 android:layout_width="0dp"
@@ -120,7 +115,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:orientation="horizontal">
-
             <Button
                 android:id="@+id/difficultyButton"
                 android:layout_width="0dp"
@@ -129,7 +123,6 @@
                 android:layout_weight="1"
                 android:background="@drawable/bg_button_dim"
                 android:textColor="@color/text_main" />
-
             <Button
                 android:id="@+id/soundButton"
                 android:layout_width="0dp"
@@ -147,6 +140,5 @@
             android:background="@drawable/bg_button_dim"
             android:text="تصفير النقاط"
             android:textColor="@color/text_dim" />
-
     </LinearLayout>
 </ScrollView>

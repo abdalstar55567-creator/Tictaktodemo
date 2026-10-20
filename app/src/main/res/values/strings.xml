@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">لعبة إكس أو</string>
-    <string name="restart">إعادة اللعب</string>
+    <string name="app_name">XO Zoom</string>
 </resources>

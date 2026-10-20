@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="28dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="XO Zoom"
+        android:textColor="@color/text_main"
+        android:textSize="42sp"
+        android:textStyle="bold" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        android:text="اختر لعبتك"
+        android:textColor="@color/text_dim"
+        android:textSize="17sp" />
+
+    <Button
+        android:id="@+id/playXo"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:background="@drawable/bg_button"
+        android:text="❌⭕   لعبة إكس أو"
+        android:textColor="@color/text_main"
+        android:textSize="19sp" />
+
+    <Button
+        android:id="@+id/playMemory"
+        android:layout_width="match_parent"
+        android:layout_height="68dp"
+        android:layout_marginTop="14dp"
+        android:background="@drawable/bg_button_dim"
+        android:text="🧠   لعبة الذاكرة"
+        android:textColor="@color/text_main"
+        android:textSize="19sp" />
+
+    <Button
+        android:id="@+id/menuSound"
+        android:layout_width="match_parent"
+        android:layout_height="48dp"
+        android:layout_marginTop="36dp"
+        android:background="@drawable/bg_button_dim"
+        android:textColor="@color/text_dim" />
+
+</LinearLayout>

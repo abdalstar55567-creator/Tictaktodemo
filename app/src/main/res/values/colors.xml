@@ -1,15 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="bg">#100A2A</color>
-    <color name="panel">#21164A</color>
-    <color name="cell">#2A2056</color>
-    <color name="x_color">#36E7FF</color>
-    <color name="o_color">#FF4FA3</color>
-    <color name="gold">#FFE44D</color>
-    <color name="text_main">#FFFFFF</color>
-    <color name="text_dim">#C6B9F5</color>
-    <color name="icon_bg">#5B21B6</color>
-    <color name="neon_purple">#8B5CFF</color>
-    <color name="neon_green">#B7FF4A</color>
-    <color name="neon_orange">#FF9F43</color>
+    <color name="bg">#0F172A</color>
+    <color name="panel">#1E293B</color>
+    <color name="cell">#273449</color>
+    <color name="x_color">#38BDF8</color>
+    <color name="o_color">#FB7185</color>
+    <color name="gold">#FACC15</color>
+    <color name="text_main">#F8FAFC</color>
+    <color name="text_dim">#94A3B8</color>
+    <color name="icon_bg">#0F172A</color>
 </resources>

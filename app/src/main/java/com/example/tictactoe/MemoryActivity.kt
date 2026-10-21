@@ -11,7 +11,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
-class MemoryActivity : AppCompatActivity() {
+class MemoryActivity : BaseGameActivity() {
+
+    override val gameTitle: String get() = "لعبة الذاكرة"
 
     private val emojis = listOf("🐱", "🐶", "🦊", "🐼", "🐸", "🦁", "🐵", "🐙")
 
@@ -53,11 +55,6 @@ class MemoryActivity : AppCompatActivity() {
         handler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
-
-    private fun dp(value: Int): Int =
-        TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, value.toFloat(), resources.displayMetrics
-        ).toInt()
 
     private fun buildBoard() {
         val grid = findViewById<GridLayout>(R.id.memBoard)

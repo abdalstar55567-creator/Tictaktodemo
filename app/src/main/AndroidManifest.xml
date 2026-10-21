@@ -20,25 +20,20 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".MainActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".MemoryActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".RockPaperScissorsActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
-
-        <activity
-            android:name=".GuessNumberActivity"
-            android:exported="false"
-            android:screenOrientation="portrait" />
+        <activity android:name=".MainActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MemoryActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".GuessNumberActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".RpsActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MathActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".WhackActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".TapSpeedActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".ReactionActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".PuzzleActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".DiceActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".ColorMatchActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".SnakeActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".SimonActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
+
 </manifest>

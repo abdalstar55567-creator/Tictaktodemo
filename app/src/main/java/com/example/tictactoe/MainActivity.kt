@@ -17,7 +17,9 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : BaseGameActivity() {
+
+    override val gameTitle: String get() = "إكس أو"
 
     private val cells = ArrayList<TextView>()
     private val board = Array(9) { "" }
@@ -101,11 +103,6 @@ class MainActivity : AppCompatActivity() {
         winAnimators.forEach { it.cancel() }
         super.onDestroy()
     }
-
-    private fun dp(value: Int): Int =
-        TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, value.toFloat(), resources.displayMetrics
-        ).toInt()
 
     private fun buildBoard() {
         val grid = findViewById<GridLayout>(R.id.board)

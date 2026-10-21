@@ -4,25 +4,29 @@
     android:layout_height="match_parent"
     android:background="@color/bg"
     android:fillViewport="true">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center_horizontal"
         android:orientation="vertical"
         android:padding="20dp">
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="100+ • 🧠 الذاكرة"
-            android:textColor="@color/gold"
+            android:text="🧠 لعبة الذاكرة"
+            android:textColor="@color/text_main"
             android:textSize="28sp"
             android:textStyle="bold" />
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
             android:orientation="horizontal">
+
             <TextView
                 android:id="@+id/memMoves"
                 android:layout_width="0dp"
@@ -35,6 +39,7 @@
                 android:textColor="@color/x_color"
                 android:textSize="17sp"
                 android:textStyle="bold" />
+
             <TextView
                 android:id="@+id/memBest"
                 android:layout_width="0dp"
@@ -47,6 +52,7 @@
                 android:textSize="17sp"
                 android:textStyle="bold" />
         </LinearLayout>
+
         <TextView
             android:id="@+id/memStatus"
             android:layout_width="wrap_content"
@@ -56,12 +62,14 @@
             android:textColor="@color/text_main"
             android:textSize="19sp"
             android:textStyle="bold" />
+
         <GridLayout
             android:id="@+id/memBoard"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:columnCount="4"
             android:rowCount="4" />
+
         <Button
             android:id="@+id/memNew"
             android:layout_width="match_parent"
@@ -70,5 +78,6 @@
             android:background="@drawable/bg_button"
             android:text="لعبة جديدة"
             android:textColor="@color/text_main" />
+
     </LinearLayout>
 </ScrollView>

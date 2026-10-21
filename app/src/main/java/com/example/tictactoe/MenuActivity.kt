@@ -3,6 +3,8 @@ package com.example.tictactoe
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 
 class MenuActivity : AppCompatActivity() {
@@ -13,34 +15,25 @@ class MenuActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_menu)
 
+        findViewById<TextView>(R.id.menuCount).text =
+            "${Games.all.size} ألعاب جاهزة — والمزيد قريباً!"
+
+        val list = findViewById<LinearLayout>(R.id.gamesList)
+        Games.all.forEachIndexed { i, game ->
+            list.addView(
+                Ui.button(this, game.emoji + "   " + game.title, i % 2 == 0, 12, 60) {
+                    Feedback.tap(this)
+                    startActivity(Intent(this, game.cls))
+                }
+            )
+        }
+
         soundButton = findViewById(R.id.menuSound)
-
-        findViewById<Button>(R.id.playXo).setOnClickListener {
-            Feedback.tap(this)
-            startActivity(Intent(this, MainActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.playMemory).setOnClickListener {
-            Feedback.tap(this)
-            startActivity(Intent(this, MemoryActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.playRps).setOnClickListener {
-            Feedback.tap(this)
-            startActivity(Intent(this, RockPaperScissorsActivity::class.java))
-        }
-
-        findViewById<Button>(R.id.playGuess).setOnClickListener {
-            Feedback.tap(this)
-            startActivity(Intent(this, GuessNumberActivity::class.java))
-        }
-
         soundButton.setOnClickListener {
             Feedback.setEnabled(this, !Feedback.enabled(this))
             Feedback.tap(this)
             updateSoundButton()
         }
-
         updateSoundButton()
     }
 

@@ -1,98 +1,103 @@
 package com.example.tictactoe
 
 import android.os.Bundle
+import android.text.InputType
+import android.util.TypedValue
 import android.view.Gravity
-import android.widget.Button
 import android.widget.EditText
-import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.app.AppCompatActivity
+import kotlin.random.Random
 
-class GuessNumberActivity : AppCompatActivity() {
-    private var secret = (1..100).random()
-    private var attempts = 0
-    private var best = 0
-    private lateinit var message: TextView
-    private lateinit var attemptsText: TextView
+class GuessNumberActivity : BaseGameActivity() {
+
+    private var secret = 0
+    private var tries = 0
+    private var finished = false
+
+    private lateinit var hintText: TextView
+    private lateinit var triesText: TextView
+    private lateinit var bestText: TextView
     private lateinit var input: EditText
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        best = getSharedPreferences("hundredplus", MODE_PRIVATE).getInt("guess_best", 0)
-        val root = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
-            setPadding(28, 24, 28, 24)
-            setBackgroundColor(android.graphics.Color.rgb(16, 10, 42))
-        }
-        fun label(text: String, size: Float, color: Int = android.graphics.Color.WHITE) =
-            TextView(this).apply {
-                this.text = text
-                textSize = size
-                setTextColor(color)
-                gravity = Gravity.CENTER
-                setPadding(8, 12, 8, 12)
-            }
+        initScreen("🔢 خمّن الرقم")
 
-        root.addView(label("100+  •  🔢 خمن الرقم", 28f, android.graphics.Color.rgb(255, 228, 77)))
-        root.addView(label("اخترت رقمًا من 1 إلى 100. هل تستطيع معرفته؟", 18f))
-        message = label("أدخل تخمينك أدناه 👇", 19f, android.graphics.Color.rgb(54, 231, 255))
-        root.addView(message)
-        input = EditText(this).apply {
-            hint = "رقم من 1 إلى 100"
-            inputType = android.text.InputType.TYPE_CLASS_NUMBER
-            textSize = 22f
-            gravity = Gravity.CENTER
-            setSingleLine(true)
-        }
-        root.addView(input, LinearLayout.LayoutParams(-1, 60))
-        val guess = Button(this).apply {
-            text = "تحقق من الرقم"
-            setOnClickListener { checkGuess() }
-        }
-        root.addView(guess)
-        attemptsText = label("", 17f)
-        root.addView(attemptsText)
-        root.addView(Button(this).apply {
-            text = "رقم جديد"
-            setOnClickListener { newGame() }
-        })
-        setContentView(root)
-        updateAttempts()
-    }
+        content.addView(
+            label("فكّرت في رقم بين 1 و 100.\nهل تستطيع تخمينه بأقل عدد من المحاولات؟", 16f, R.color.text_dim, false),
+            lp(top = dp(8))
+        )
 
-    private fun checkGuess() {
-        val value = input.text.toString().toIntOrNull()
-        if (value == null || value !in 1..100) {
-            message.text = "أدخل رقمًا صحيحًا بين 1 و100."
-            return
-        }
-        attempts++
-        when {
-            value < secret -> { message.text = "⬆️ الرقم أكبر من $value"; Feedback.tap(this) }
-            value > secret -> { message.text = "⬇️ الرقم أصغر من $value"; Feedback.tap(this) }
-            else -> {
-                message.text = "🎉 أحسنت! الرقم هو $secret"
-                if (best == 0 || attempts < best) {
-                    best = attempts
-                    getSharedPreferences("hundredplus", MODE_PRIVATE).edit().putInt("guess_best", best).apply()
-                    message.append("\n🏆 أفضل نتيجة جديدة!")
-                }
-                Feedback.win(this)
-            }
-        }
-        updateAttempts()
+        hintText = label("ابدأ التخمين!", 26f)
+        content.addView(hintText, lp(top = dp(24)))
+
+        triesText = label("", 16f, R.color.x_color)
+        content.addView(triesText, lp(top = dp(6)))
+
+        bestText = label("", 15f, R.color.gold)
+        content.addView(bestText, lp(top = dp(4)))
+
+        input = EditText(this)
+        input.inputType = InputType.TYPE_CLASS_NUMBER
+        input.hint = "اكتب رقمك"
+        input.setHintTextColor(color(R.color.text_dim))
+        input.setTextColor(color(R.color.text_main))
+        input.setTextSize(TypedValue.COMPLEX_UNIT_SP, 24f)
+        input.gravity = Gravity.CENTER
+        input.setBackgroundResource(R.drawable.bg_panel)
+        input.setPadding(dp(12), dp(12), dp(12), dp(12))
+        content.addView(input, lp(top = dp(24)))
+
+        content.addView(button("خمّن") { guess() }, lp(height = dp(52), top = dp(12)))
+        content.addView(button("لعبة جديدة", false) { newGame() }, lp(height = dp(46), top = dp(10)))
+
+        newGame()
     }
 
     private fun newGame() {
-        secret = (1..100).random()
-        attempts = 0
-        input.text.clear()
-        message.text = "رقم جديد جاهز! حظًا موفقًا 🎮"
-        updateAttempts()
+        secret = Random.nextInt(1, 101)
+        tries = 0
+        finished = false
+        hintText.text = "ابدأ التخمين!"
+        triesText.text = "المحاولات: 0"
+        input.setText("")
+        val best = Scores.get(this, "guess_best")
+        bestText.text = if (best == 0) "" else "أفضل نتيجة: $best محاولة"
     }
 
-    private fun updateAttempts() {
-        attemptsText.text = "المحاولات: $attempts     أفضل نتيجة: " + if (best == 0) "—" else best.toString()
+    private fun guess() {
+        if (finished) return
+        val n = input.text.toString().toIntOrNull()
+        if (n == null || n < 1 || n > 100) {
+            hintText.text = "أدخل رقماً من 1 إلى 100"
+            return
+        }
+
+        tries++
+        triesText.text = "المحاولات: $tries"
+        input.setText("")
+
+        when {
+            n < secret -> {
+                hintText.text = "⬆️ الرقم أكبر من $n"
+                Feedback.tap(this)
+            }
+            n > secret -> {
+                hintText.text = "⬇️ الرقم أصغر من $n"
+                Feedback.tap(this)
+            }
+            else -> {
+                finished = true
+                hintText.text = "🎉 صحيح! الرقم $secret"
+                Feedback.win(this)
+                val best = Scores.get(this, "guess_best")
+                if (best == 0 || tries < best) {
+                    Scores.put(this, "guess_best", tries)
+                    triesText.text = "رقم قياسي جديد! 🏆 ($tries محاولة)"
+                }
+                val newBest = Scores.get(this, "guess_best")
+                bestText.text = "أفضل نتيجة: $newBest محاولة"
+            }
+        }
     }
 }

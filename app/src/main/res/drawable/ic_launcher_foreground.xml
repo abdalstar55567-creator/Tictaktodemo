@@ -4,10 +4,16 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:pathData="M15,20 L30,42 M30,20 L15,42"
-        android:fillColor="#00000000" android:strokeColor="#36E7FF" android:strokeWidth="5" android:strokeLineCap="round" />
-    <path android:pathData="M45,31 m-10,0 a10,10 0 1,0 20,0 a10,10 0 1,0 -20,0"
-        android:fillColor="#00000000" android:strokeColor="#FF4FA3" android:strokeWidth="5" />
-    <path android:pathData="M20,57 L88,57" android:strokeColor="#FFE44D" android:strokeWidth="2" />
-    <path android:pathData="M25,65 L83,65" android:strokeColor="#B7FF4A" android:strokeWidth="2" />
+
+    <!-- النرد -->
+    <path
+        android:pathData="M38,28 H70 A10,10 0 0 1 80,38 V70 A10,10 0 0 1 70,80 H38 A10,10 0 0 1 28,70 V38 A10,10 0 0 1 38,28 Z"
+        android:fillColor="#F8FAFC" />
+
+    <!-- النقاط الخمس -->
+    <path android:pathData="M40,40 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" android:fillColor="#38BDF8" />
+    <path android:pathData="M68,40 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" android:fillColor="#FB7185" />
+    <path android:pathData="M54,54 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" android:fillColor="#FACC15" />
+    <path android:pathData="M40,68 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" android:fillColor="#FB7185" />
+    <path android:pathData="M68,68 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" android:fillColor="#38BDF8" />
 </vector>

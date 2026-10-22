@@ -33,6 +33,16 @@
         <activity android:name=".ColorMatchActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SnakeActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SimonActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".Connect4Activity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".HangmanActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".Game2048Activity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".ScrambleActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".TriviaActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".HigherLowerActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".OddOneActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".NumberOrderActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".LuckBoxActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".NumberMemoryActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

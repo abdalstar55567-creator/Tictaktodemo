@@ -1,0 +1,690 @@
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 9f0821a..f39b532 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -43,6 +43,11 @@
+         <activity android:name=".NumberOrderActivity" android:exported="false" android:screenOrientation="portrait" />
+         <activity android:name=".LuckBoxActivity" android:exported="false" android:screenOrientation="portrait" />
+         <activity android:name=".NumberMemoryActivity" android:exported="false" android:screenOrientation="portrait" />
++        <activity android:name=".CoinFlipActivity" android:exported="false" android:screenOrientation="portrait" />
++        <activity android:name=".LightsOutActivity" android:exported="false" android:screenOrientation="portrait" />
++        <activity android:name=".SequenceActivity" android:exported="false" android:screenOrientation="portrait" />
++        <activity android:name=".StopTimeActivity" android:exported="false" android:screenOrientation="portrait" />
++        <activity android:name=".TugOfWarActivity" android:exported="false" android:screenOrientation="portrait" />
+ 
+     </application>
+ 
+diff --git a/app/src/main/java/com/example/tictactoe/CoinFlipActivity.kt b/app/src/main/java/com/example/tictactoe/CoinFlipActivity.kt
+new file mode 100644
+index 0000000..f0d0005
+--- /dev/null
++++ b/app/src/main/java/com/example/tictactoe/CoinFlipActivity.kt
+@@ -0,0 +1,115 @@
++package com.example.tictactoe
++
++import android.os.Bundle
++import android.os.Handler
++import android.os.Looper
++import android.widget.Button
++import android.widget.TextView
++import kotlin.random.Random
++
++class CoinFlipActivity : BaseGameActivity() {
++
++    private val handler = Handler(Looper.getMainLooper())
++    private var busy = false
++    private var streak = 0
++    private var rounds = 0
++    private var hits = 0
++
++    private lateinit var coinText: TextView
++    private lateinit var statusText: TextView
++    private lateinit var streakText: TextView
++    private lateinit var bestText: TextView
++    private lateinit var headsButton: Button
++    private lateinit var tailsButton: Button
++
++    override fun onCreate(savedInstanceState: Bundle?) {
++        super.onCreate(savedInstanceState)
++        initScreen("🪙 وجه أم كتابة؟")
++
++        content.addView(
++            label("خمّن على أي وجه ستستقر العملة. كم سلسلة فوز تستطيع تحقيقها؟", 16f, R.color.text_dim, false),
++            lp(top = dp(8))
++        )
++
++        streakText = label("", 20f, R.color.x_color)
++        content.addView(streakText, lp(top = dp(14)))
++
++        bestText = label("", 15f, R.color.gold)
++        content.addView(bestText, lp(top = dp(2)))
++
++        coinText = label("🪙", 90f)
++        content.addView(coinText, lp(top = dp(18)))
++
++        statusText = label("اختر وجه أو كتابة", 20f)
++        content.addView(statusText, lp(top = dp(6), bottom = dp(18)))
++
++        val r = row()
++        headsButton = button("👑 وجه") { guess(true) }
++        tailsButton = button("📜 كتابة") { guess(false) }
++        headsButton.textSize = 20f
++        tailsButton.textSize = 20f
++        r.addView(headsButton, weightLp(dp(64)))
++        r.addView(tailsButton, weightLp(dp(64)))
++        content.addView(r, lp(top = dp(8)))
++
++        content.addView(button("ابدأ من جديد", false) { resetAll() }, lp(height = dp(46), top = dp(24)))
++        updateTexts()
++    }
++
++    private fun setChoicesEnabled(on: Boolean) {
++        headsButton.isEnabled = on
++        tailsButton.isEnabled = on
++    }
++
++    private fun updateTexts() {
++        streakText.text = "سلسلة الفوز: $streak   |   الإصابات: $hits من $rounds"
++        val best = Scores.get(this, "coin_best")
++        bestText.text = if (best == 0) "" else "أفضل سلسلة: $best"
++    }
++
++    private fun resetAll() {
++        handler.removeCallbacksAndMessages(null)
++        busy = false
++        streak = 0
++        rounds = 0
++        hits = 0
++        coinText.text = "🪙"
++        statusText.text = "اختر وجه أو كتابة"
++        setChoicesEnabled(true)
++        updateTexts()
++    }
++
++    private fun guess(heads: Boolean) {
++        if (busy) return
++        busy = true
++        setChoicesEnabled(false)
++        coinText.text = "🌀"
++        statusText.text = "العملة تدور..."
++        Feedback.tap(this)
++
++        handler.postDelayed({
++            val resultHeads = Random.nextBoolean()
++            coinText.text = if (resultHeads) "👑" else "📜"
++            rounds++
++            if (resultHeads == heads) {
++                streak++
++                hits++
++                statusText.text = "🎉 صحيح! خرجت ${if (resultHeads) "وجه" else "كتابة"}"
++                Feedback.win(this)
++                Scores.saveHigh(this, "coin_best", streak)
++            } else {
++                streak = 0
++                statusText.text = "😅 خرجت ${if (resultHeads) "وجه" else "كتابة"}، حاول مجدداً"
++                Feedback.lose(this)
++            }
++            updateTexts()
++            setChoicesEnabled(true)
++            busy = false
++        }, 700)
++    }
++
++    override fun onDestroy() {
++        handler.removeCallbacksAndMessages(null)
++        super.onDestroy()
++    }
++}
+diff --git a/app/src/main/java/com/example/tictactoe/Games.kt b/app/src/main/java/com/example/tictactoe/Games.kt
+index 84e493b..8dc14e8 100644
+--- a/app/src/main/java/com/example/tictactoe/Games.kt
++++ b/app/src/main/java/com/example/tictactoe/Games.kt
+@@ -30,6 +30,11 @@ object Games {
+         GameInfo("🎯", "ابحث عن المختلف", OddOneActivity::class.java),
+         GameInfo("🔟", "رتّب الأرقام", NumberOrderActivity::class.java),
+         GameInfo("🎁", "حظ الصندوق", LuckBoxActivity::class.java),
+-        GameInfo("🧠", "ذاكرة الأرقام", NumberMemoryActivity::class.java)
++        GameInfo("🧠", "ذاكرة الأرقام", NumberMemoryActivity::class.java),
++        GameInfo("🪙", "وجه أم كتابة؟", CoinFlipActivity::class.java),
++        GameInfo("💡", "أطفئ الأضواء", LightsOutActivity::class.java),
++        GameInfo("🔗", "أكمل التسلسل", SequenceActivity::class.java),
++        GameInfo("⏱️", "أوقف الوقت", StopTimeActivity::class.java),
++        GameInfo("🪢", "شد الحبل (لاعبان)", TugOfWarActivity::class.java)
+     )
+ }
+diff --git a/app/src/main/java/com/example/tictactoe/LightsOutActivity.kt b/app/src/main/java/com/example/tictactoe/LightsOutActivity.kt
+new file mode 100644
+index 0000000..51d7f47
+--- /dev/null
++++ b/app/src/main/java/com/example/tictactoe/LightsOutActivity.kt
+@@ -0,0 +1,109 @@
++package com.example.tictactoe
++
++import android.os.Bundle
++import android.view.View
++import android.widget.LinearLayout
++import android.widget.TextView
++import kotlin.random.Random
++
++/** أطفئ كل الأضواء: الضغط على مربع يقلب حالته وحالة جيرانه الأربعة. */
++class LightsOutActivity : BaseGameActivity() {
++
++    private val size = 5
++    private val on = Array(size) { BooleanArray(size) }
++    private val cells = Array(size) { arrayOfNulls<View>(size) }
++    private var moves = 0
++    private var won = false
++
++    private lateinit var movesText: TextView
++    private lateinit var bestText: TextView
++    private lateinit var statusText: TextView
++
++    override fun onCreate(savedInstanceState: Bundle?) {
++        super.onCreate(savedInstanceState)
++        initScreen("💡 أطفئ الأضواء")
++
++        content.addView(
++            label("اضغط على مربع لقلب حالته وحالة جيرانه. أطفئ كل الأضواء بأقل عدد من النقلات!", 16f, R.color.text_dim, false),
++            lp(top = dp(8))
++        )
++
++        movesText = label("", 20f, R.color.x_color)
++        content.addView(movesText, lp(top = dp(12)))
++
++        bestText = label("", 15f, R.color.gold)
++        content.addView(bestText, lp(top = dp(2)))
++
++        statusText = label("", 18f)
++        content.addView(statusText, lp(top = dp(8), bottom = dp(10)))
++
++        val grid = LinearLayout(this)
++        grid.orientation = LinearLayout.VERTICAL
++        for (r in 0 until size) {
++            val line = row()
++            for (c in 0 until size) {
++                val cell = View(this)
++                cell.setOnClickListener { press(r, c, true) }
++                cells[r][c] = cell
++                line.addView(cell, weightLp(dp(58)))
++            }
++            grid.addView(line, lp(top = dp(if (r == 0) 0 else 6)))
++        }
++        content.addView(grid, lp(top = dp(6)))
++
++        content.addView(button("لعبة جديدة", false) { newGame() }, lp(height = dp(46), top = dp(22)))
++        newGame()
++    }
++
++    private fun newGame() {
++        for (r in 0 until size) for (c in 0 until size) on[r][c] = false
++        // نخلط باستخدام ضغطات حقيقية ليكون الحل ممكناً دائماً
++        do {
++            for (i in 0 until 12) press(Random.nextInt(size), Random.nextInt(size), false)
++        } while (isSolved())
++        moves = 0
++        won = false
++        statusText.text = "أطفئ كل الأضواء 💡"
++        render()
++    }
++
++    private fun toggle(r: Int, c: Int) {
++        if (r in 0 until size && c in 0 until size) on[r][c] = !on[r][c]
++    }
++
++    private fun press(r: Int, c: Int, player: Boolean) {
++        if (player && won) return
++        toggle(r, c)
++        toggle(r - 1, c)
++        toggle(r + 1, c)
++        toggle(r, c - 1)
++        toggle(r, c + 1)
++        if (!player) return
++
++        moves++
++        Feedback.tap(this)
++        if (isSolved()) {
++            won = true
++            statusText.text = "🎉 أحسنت! أطفأتها في $moves نقلة"
++            Feedback.win(this)
++            if (Scores.saveLow(this, "lights_best", moves)) {
++                statusText.text = "🏆 رقم قياسي جديد: $moves نقلة"
++            }
++        }
++        render()
++    }
++
++    private fun isSolved(): Boolean = on.all { row -> row.none { it } }
++
++    private fun render() {
++        for (r in 0 until size) {
++            for (c in 0 until size) {
++                val colorInt = color(if (on[r][c]) R.color.gold else R.color.cell)
++                cells[r][c]?.background = Ui.panelBg(this, colorInt, 10)
++            }
++        }
++        movesText.text = "النقلات: $moves"
++        val best = Scores.get(this, "lights_best")
++        bestText.text = if (best == 0) "" else "أفضل نتيجة: $best نقلة"
++    }
++}
+diff --git a/app/src/main/java/com/example/tictactoe/SequenceActivity.kt b/app/src/main/java/com/example/tictactoe/SequenceActivity.kt
+new file mode 100644
+index 0000000..58803d4
+--- /dev/null
++++ b/app/src/main/java/com/example/tictactoe/SequenceActivity.kt
+@@ -0,0 +1,172 @@
++package com.example.tictactoe
++
++import android.os.Bundle
++import android.os.Handler
++import android.os.Looper
++import android.widget.Button
++import android.widget.TextView
++import kotlin.random.Random
++
++/** أكمل التسلسل: اختر الرقم التالي في السلسلة. عشرة أسئلة في كل جولة. */
++class SequenceActivity : BaseGameActivity() {
++
++    private val handler = Handler(Looper.getMainLooper())
++    private val totalQuestions = 10
++    private var question = 0
++    private var score = 0
++    private var answer = 0
++    private var locked = false
++    private var finished = false
++
++    private lateinit var progressText: TextView
++    private lateinit var bestText: TextView
++    private lateinit var seqText: TextView
++    private lateinit var statusText: TextView
++    private val optionButtons = ArrayList<Button>()
++
++    override fun onCreate(savedInstanceState: Bundle?) {
++        super.onCreate(savedInstanceState)
++        initScreen("🔗 أكمل التسلسل")
++
++        content.addView(
++            label("اكتشف القاعدة واختر الرقم التالي في السلسلة.", 16f, R.color.text_dim, false),
++            lp(top = dp(8))
++        )
++
++        progressText = label("", 20f, R.color.x_color)
++        content.addView(progressText, lp(top = dp(14)))
++
++        bestText = label("", 15f, R.color.gold)
++        content.addView(bestText, lp(top = dp(2)))
++
++        seqText = label("", 30f)
++        content.addView(seqText, lp(top = dp(22)))
++
++        statusText = label("", 18f)
++        content.addView(statusText, lp(top = dp(10), bottom = dp(14)))
++
++        for (rowIndex in 0 until 2) {
++            val r = row()
++            for (k in 0 until 2) {
++                val idx = rowIndex * 2 + k
++                val b = button("", false) { choose(idx) }
++                b.textSize = 22f
++                optionButtons.add(b)
++                r.addView(b, weightLp(dp(64)))
++            }
++            content.addView(r, lp(top = dp(8)))
++        }
++
++        content.addView(button("ابدأ من جديد", false) { newGame() }, lp(height = dp(46), top = dp(24)))
++        newGame()
++    }
++
++    private fun newGame() {
++        question = 0
++        score = 0
++        finished = false
++        nextQuestion()
++    }
++
++    private fun updateTexts() {
++        progressText.text = "السؤال ${minOf(question, totalQuestions)} من $totalQuestions   |   النقاط: $score"
++        val best = Scores.get(this, "seq_best")
++        bestText.text = if (best == 0) "" else "أفضل نتيجة: $best من $totalQuestions"
++    }
++
++    /** يبني تسلسلاً من خمسة أرقام: أول أربعة تُعرض، والخامس هو الجواب. */
++    private fun buildSequence(): List<Int> {
++        return when (Random.nextInt(4)) {
++            0 -> { // حسابي: نضيف نفس العدد كل مرة
++                val start = Random.nextInt(1, 20)
++                val step = Random.nextInt(2, 10) * if (Random.nextBoolean()) 1 else -1
++                List(5) { start + step * it }
++            }
++            1 -> { // هندسي: نضرب بنفس العدد كل مرة
++                val start = Random.nextInt(1, 4)
++                val ratio = Random.nextInt(2, 4)
++                var v = start
++                List(5) { val cur = v; v *= ratio; cur }
++            }
++            2 -> { // مربعات الأعداد
++                val n = Random.nextInt(1, 7)
++                List(5) { (n + it) * (n + it) }
++            }
++            else -> { // فروق متزايدة
++                val start = Random.nextInt(1, 10)
++                val d = Random.nextInt(1, 4)
++                var v = start
++                var step = d
++                List(5) { val cur = v; v += step; step += 1; cur }
++            }
++        }
++    }
++
++    private fun nextQuestion() {
++        if (question >= totalQuestions) {
++            endGame()
++            return
++        }
++        question++
++        locked = false
++
++        val seq = buildSequence()
++        answer = seq[4]
++        seqText.text = seq.take(4).joinToString("  ،  ") + "  ،  ؟"
++        statusText.text = ""
++
++        val options = linkedSetOf(answer)
++        var guard = 0
++        while (options.size < 4 && guard < 200) {
++            guard++
++            val offset = Random.nextInt(1, 11) * if (Random.nextBoolean()) 1 else -1
++            options.add(answer + offset)
++        }
++        val shuffled = options.toMutableList()
++        shuffled.shuffle()
++        optionButtons.forEachIndexed { i, b ->
++            b.text = shuffled[i].toString()
++            b.isEnabled = true
++            b.alpha = 1f
++        }
++        updateTexts()
++    }
++
++    private fun choose(i: Int) {
++        if (locked || finished) return
++        locked = true
++        val picked = optionButtons[i].text.toString().toIntOrNull()
++        if (picked == answer) {
++            score++
++            statusText.text = "✅ صحيح!"
++            Feedback.match(this)
++        } else {
++            statusText.text = "❌ الجواب الصحيح: $answer"
++            Feedback.lose(this)
++        }
++        optionButtons.forEach { it.isEnabled = false }
++        updateTexts()
++        handler.postDelayed({
++            if (!isFinishing && !isDestroyed) nextQuestion()
++        }, 900)
++    }
++
++    private fun endGame() {
++        finished = true
++        locked = true
++        optionButtons.forEach { it.isEnabled = false }
++        seqText.text = "🏁 النتيجة: $score من $totalQuestions"
++        statusText.text = if (Scores.saveHigh(this, "seq_best", score)) {
++            "🏆 رقم قياسي جديد!"
++        } else {
++            "اضغط «ابدأ من جديد» للمحاولة مرة أخرى"
++        }
++        if (score >= 7) Feedback.win(this) else Feedback.draw(this)
++        updateTexts()
++    }
++
++    override fun onDestroy() {
++        handler.removeCallbacksAndMessages(null)
++        super.onDestroy()
++    }
++}
+diff --git a/app/src/main/java/com/example/tictactoe/StopTimeActivity.kt b/app/src/main/java/com/example/tictactoe/StopTimeActivity.kt
+new file mode 100644
+index 0000000..476d40b
+--- /dev/null
++++ b/app/src/main/java/com/example/tictactoe/StopTimeActivity.kt
+@@ -0,0 +1,121 @@
++package com.example.tictactoe
++
++import android.os.Bundle
++import android.os.Handler
++import android.os.Looper
++import android.os.SystemClock
++import android.widget.Button
++import android.widget.TextView
++
++/** أوقف الوقت عند 5.00 ثوانٍ بالضبط. الأرقام تختفي بعد ثانيتين! */
++class StopTimeActivity : BaseGameActivity() {
++
++    private val targetMs = 5000L
++    private val hideAfterMs = 2000L
++    private val handler = Handler(Looper.getMainLooper())
++
++    private var running = false
++    private var startTime = 0L
++
++    private lateinit var timerText: TextView
++    private lateinit var statusText: TextView
++    private lateinit var bestText: TextView
++    private lateinit var actionButton: Button
++
++    private val ticker = object : Runnable {
++        override fun run() {
++            if (!running) return
++            val elapsed = SystemClock.elapsedRealtime() - startTime
++            timerText.text = if (elapsed < hideAfterMs) format(elapsed) else "؟.؟؟"
++            handler.postDelayed(this, 30)
++        }
++    }
++
++    override fun onCreate(savedInstanceState: Bundle?) {
++        super.onCreate(savedInstanceState)
++        initScreen("⏱️ أوقف الوقت")
++
++        content.addView(
++            label("اضغط «ابدأ» ثم «أوقف» عندما تظن أنه مرّت 5 ثوانٍ بالضبط. العدّاد يختفي بعد ثانيتين!", 16f, R.color.text_dim, false),
++            lp(top = dp(8))
++        )
++
++        bestText = label("", 15f, R.color.gold)
++        content.addView(bestText, lp(top = dp(14)))
++
++        timerText = label("0.00", 72f, R.color.x_color)
++        content.addView(timerText, lp(top = dp(24)))
++
++        statusText = label("الهدف: 5.00 ثانية", 19f)
++        content.addView(statusText, lp(top = dp(8), bottom = dp(22)))
++
++        actionButton = button("ابدأ") { onAction() }
++        actionButton.textSize = 22f
++        content.addView(actionButton, lp(height = dp(72), top = dp(8)))
++
++        content.addView(button("تصفير أفضل نتيجة", false) {
++            Scores.put(this, "stop_best", 0)
++            updateBest()
++        }, lp(height = dp(46), top = dp(28)))
++        updateBest()
++    }
++
++    private fun format(ms: Long): String {
++        val hundredths = ms / 10
++        return "${hundredths / 100}.${(hundredths % 100).toString().padStart(2, '0')}"
++    }
++
++    private fun updateBest() {
++        val best = Scores.get(this, "stop_best")
++        bestText.text = if (best == 0) "" else "أفضل دقة: فرق ${best} ملّي ثانية"
++    }
++
++    private fun onAction() {
++        if (!running) {
++            running = true
++            startTime = SystemClock.elapsedRealtime()
++            statusText.text = "الهدف: 5.00 ثانية"
++            actionButton.text = "أوقف"
++            Feedback.tap(this)
++            handler.post(ticker)
++        } else {
++            val elapsed = SystemClock.elapsedRealtime() - startTime
++            stopRunning()
++            timerText.text = format(elapsed)
++            val diff = Math.abs(elapsed - targetMs).toInt()
++            val verdict = when {
++                diff <= 50 -> "🤩 مذهل! دقة خارقة"
++                diff <= 200 -> "😎 ممتاز!"
++                diff <= 500 -> "🙂 جيد"
++                else -> "😅 حاول مرة أخرى"
++            }
++            statusText.text = "$verdict\nالفرق: $diff ملّي ثانية"
++            // نخزّن 1 على الأقل حتى لا يُفهم الصفر على أنه «لا توجد نتيجة»
++            if (Scores.saveLow(this, "stop_best", maxOf(diff, 1))) {
++                statusText.text = statusText.text.toString() + "\n🏆 رقم قياسي جديد!"
++            }
++            if (diff <= 200) Feedback.win(this) else Feedback.lose(this)
++            updateBest()
++        }
++    }
++
++    private fun stopRunning() {
++        running = false
++        handler.removeCallbacks(ticker)
++        actionButton.text = "ابدأ"
++    }
++
++    override fun onPause() {
++        if (running) {
++            stopRunning()
++            timerText.text = "0.00"
++            statusText.text = "توقفت اللعبة. اضغط «ابدأ» للمحاولة من جديد"
++        }
++        super.onPause()
++    }
++
++    override fun onDestroy() {
++        handler.removeCallbacks(ticker)
++        super.onDestroy()
++    }
++}
+diff --git a/app/src/main/java/com/example/tictactoe/TugOfWarActivity.kt b/app/src/main/java/com/example/tictactoe/TugOfWarActivity.kt
+new file mode 100644
+index 0000000..6bf2d40
+--- /dev/null
++++ b/app/src/main/java/com/example/tictactoe/TugOfWarActivity.kt
+@@ -0,0 +1,110 @@
++package com.example.tictactoe
++
++import android.os.Bundle
++import android.view.View
++import android.widget.Button
++import android.widget.LinearLayout
++import android.widget.TextView
++
++/** شد الحبل: لاعبان على نفس الهاتف. اضغط بأسرع ما تستطيع لسحب العلامة إلى جهتك. */
++class TugOfWarActivity : BaseGameActivity() {
++
++    private val steps = 9          // عدد خلايا الحبل
++    private val start = steps / 2  // موضع البداية في المنتصف
++    private var pos = start
++    private var over = false
++    private var topWins = 0
++    private var bottomWins = 0
++
++    private val cells = ArrayList<View>()
++    private lateinit var topButton: Button
++    private lateinit var bottomButton: Button
++    private lateinit var statusText: TextView
++    private lateinit var scoreText: TextView
++
++    override fun onCreate(savedInstanceState: Bundle?) {
++        super.onCreate(savedInstanceState)
++        initScreen("🪢 شد الحبل (لاعبان)")
++
++        content.addView(
++            label("لكل لاعب زر. اضغط بسرعة لتسحب العلامة إلى جهتك وأول من يوصلها إلى طرفه يفوز!", 16f, R.color.text_dim, false),
++            lp(top = dp(8))
++        )
++
++        scoreText = label("", 17f, R.color.gold)
++        content.addView(scoreText, lp(top = dp(10)))
++
++        // زر اللاعب العلوي مقلوب ليقرأه من يجلس في الجهة المقابلة
++        topButton = button("اسحب! 🔴") { pull(top = true) }
++        topButton.textSize = 22f
++        topButton.rotation = 180f
++        content.addView(topButton, lp(height = dp(84), top = dp(12)))
++
++        val rope = LinearLayout(this)
++        rope.orientation = LinearLayout.VERTICAL
++        for (i in 0 until steps) {
++            val cell = View(this)
++            cells.add(cell)
++            rope.addView(cell, lp(height = dp(20), top = dp(if (i == 0) 0 else 4)))
++        }
++        content.addView(rope, lp(top = dp(12)))
++
++        bottomButton = button("اسحب! 🔵") { pull(top = false) }
++        bottomButton.textSize = 22f
++        content.addView(bottomButton, lp(height = dp(84), top = dp(12)))
++
++        statusText = label("", 18f)
++        content.addView(statusText, lp(top = dp(12)))
++
++        content.addView(button("جولة جديدة", false) { newRound() }, lp(height = dp(46), top = dp(14)))
++        newRound()
++    }
++
++    private fun newRound() {
++        pos = start
++        over = false
++        topButton.isEnabled = true
++        bottomButton.isEnabled = true
++        statusText.text = "ابدأوا!"
++        render()
++    }
++
++    private fun pull(top: Boolean) {
++        if (over) return
++        pos += if (top) -1 else 1
++        Feedback.tap(this)
++
++        if (pos <= 0) {
++            finishRound("🔴 فاز اللاعب العلوي!")
++            topWins++
++        } else if (pos >= steps - 1) {
++            finishRound("🔵 فاز اللاعب السفلي!")
++            bottomWins++
++        }
++        render()
++    }
++
++    private fun finishRound(message: String) {
++        over = true
++        topButton.isEnabled = false
++        bottomButton.isEnabled = false
++        statusText.text = message
++        Feedback.win(this)
++    }
++
++    private fun render() {
++        for (i in 0 until steps) {
++            val colorRes = when {
++                i == pos -> R.color.gold
++                i < start -> R.color.o_color
++                i > start -> R.color.x_color
++                else -> R.color.cell
++            }
++            val alpha = if (i == pos) 255 else 90
++            val bg = Ui.panelBg(this, color(colorRes), 8)
++            bg.alpha = alpha
++            cells[i].background = bg
++        }
++        scoreText.text = "🔴 $topWins   -   $bottomWins 🔵"
++    }
++}

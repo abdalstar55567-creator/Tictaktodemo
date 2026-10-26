@@ -43,6 +43,15 @@
         <activity android:name=".NumberOrderActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".LuckBoxActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".NumberMemoryActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".HurdleRunActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".TowerActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".FlappyActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".CatchActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".DodgeActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".BrickActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MinesweeperActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".LightsOutActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".StopBarActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

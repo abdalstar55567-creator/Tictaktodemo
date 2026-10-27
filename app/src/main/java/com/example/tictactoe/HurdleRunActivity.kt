@@ -50,6 +50,13 @@ class HurdleView(
         if (running && offset <= 0f) vy = height * 1.85f
     }
 
+    /** Tap anywhere on the game screen: start the run if needed, then jump. */
+    fun tapAnywhere() {
+        if (!running) start()
+        jump()
+        grab()
+    }
+
     override fun update(dt: Float) {
         val w = width.toFloat()
         val h = height.toFloat()
@@ -117,13 +124,18 @@ class HurdleView(
 
         val s = w * 0.09f
         textP.textSize = s * 1.3f
-        canvas.drawText("🏃", w * 0.2f, groundY - offset - s * 0.05f, textP)
+        val runnerX = w * 0.2f
+        val runnerY = groundY - offset - s * 0.05f
+        // Mirror the runner so the character faces and runs toward the left.
+        canvas.save()
+        canvas.scale(-1f, 1f, runnerX, runnerY - s * 0.45f)
+        canvas.drawText("🏃", runnerX, runnerY, textP)
+        canvas.restore()
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (event.action == MotionEvent.ACTION_DOWN) {
-            grab()
-            jump()
+            tapAnywhere()
         }
         return true
     }
@@ -139,10 +151,8 @@ class HurdleRunActivity : BaseGameActivity() {
         super.onCreate(savedInstanceState)
         initScreen("🏃 سباق الحواجز")
 
-        content.addView(
-            label("اضغط على الشاشة للقفز فوق الحواجز!", 16f, R.color.text_dim, false),
-            lp(top = dp(4))
-        )
+        val instructionText = label("المس الشاشة في أي مكان للقفز!", 16f, R.color.text_dim, false)
+        content.addView(instructionText, lp(top = dp(4)))
 
         scoreText = label("المسافة: 0 متر", 22f)
         content.addView(scoreText, lp(top = dp(6)))
@@ -159,6 +169,12 @@ class HurdleRunActivity : BaseGameActivity() {
             { s -> onGameOver(s) }
         )
         content.addView(game, lp())
+
+        // The information area is also a touch target, not just the canvas.
+        // Keep the start button's normal click behavior separate.
+        instructionText.setOnClickListener { game.tapAnywhere() }
+        scoreText.setOnClickListener { game.tapAnywhere() }
+        bestText.setOnClickListener { game.tapAnywhere() }
     }
 
     override fun onPause() {

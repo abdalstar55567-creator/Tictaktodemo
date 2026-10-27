@@ -52,6 +52,16 @@
         <activity android:name=".MinesweeperActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".LightsOutActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".StopBarActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".CoinFlipActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".DiceDuelActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".OddEvenActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".CapitalQuizActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".AnimalQuizActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".TrueFalseActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".SequenceActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".ColorQuizActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".WordScrambleActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".QuickMathActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

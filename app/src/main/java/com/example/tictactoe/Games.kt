@@ -39,6 +39,16 @@ object Games {
         GameInfo("🧱", "كسر الطوب", BrickActivity::class.java),
         GameInfo("💣", "كاسحة الألغام", MinesweeperActivity::class.java),
         GameInfo("💡", "أطفئ الأضواء", LightsOutActivity::class.java),
-        GameInfo("🎚️", "أوقف المؤشر", StopBarActivity::class.java)
+        GameInfo("🎚️", "أوقف المؤشر", StopBarActivity::class.java),
+        GameInfo("🪙", "توقّع العملة", CoinFlipActivity::class.java),
+        GameInfo("🎲", "مبارزة النرد", DiceDuelActivity::class.java),
+        GameInfo("🔢", "زوجي أم فردي", OddEvenActivity::class.java),
+        GameInfo("🌍", "تحدي العواصم", CapitalQuizActivity::class.java),
+        GameInfo("🐾", "أصوات الحيوانات", AnimalQuizActivity::class.java),
+        GameInfo("🤔", "صح أم خطأ", TrueFalseActivity::class.java),
+        GameInfo("🧠", "أكمل المتتالية", SequenceActivity::class.java),
+        GameInfo("🎨", "اختبار الألوان", ColorQuizActivity::class.java),
+        GameInfo("🔤", "خلط الكلمات", WordScrambleActivity::class.java),
+        GameInfo("⚡", "الحساب السريع", QuickMathActivity::class.java)
     )
 }

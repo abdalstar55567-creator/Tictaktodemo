@@ -11,7 +11,7 @@ import android.widget.TextView
 import kotlin.math.abs
 import kotlin.random.Random
 
-/** Ten lightweight touch-first arcade games. No external assets or libraries required. */
+/** Five distinct touch-first arcade games. No external assets or libraries required. */
 enum class MotionGame(val title: String, val hint: String) {
     CAR("سباق السيارات", "اسحب يميناً ويساراً لتبديل المسار وتفادي السيارات"),
     PACMAN("متاهة آكل النقاط", "اسحب في اتجاه الحركة واجمع النقاط وابتعد عن الأشباح"),
@@ -21,7 +21,7 @@ enum class MotionGame(val title: String, val hint: String) {
     RIVER("مغامرة النهر", "حرّك القارب يميناً ويساراً لتفادي الصخور"),
     BALL("متاهة الكرة", "اسحب الكرة في الاتجاه المطلوب للوصول إلى الهدف"),
     JUNGLE("عدّاء الغابة", "المس الشاشة للقفز فوق جذوع الأشجار"),
-    BUBBLES("جامع الفقاعات", "حرّك السلة تحت الفقاعات الساقطة"),
+    BUBBLES("تحدي الفقاعات السامة", "التقط الفقاعات الزرقاء وتجنب الحمراء؛ ثلاث فقاعات زرقاء فائتة أو لمس حمراء تنهي الجولة"),
     ESCAPE("الهروب من المتاهة", "اجمع المفاتيح ثم اعثر على المخرج وتجنب الأشباح")
 }
 
@@ -32,7 +32,7 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
     private val yellow = paint(Color.rgb(255, 218, 70)); private val red = paint(Color.rgb(255, 85, 105))
     private val green = paint(Color.rgb(80, 230, 145)); private val purple = paint(Color.rgb(190, 120, 255))
     private val p = Paint(Paint.ANTI_ALIAS_FLAG)
-    private var score = 0; private var over = false; private var started = false; private var elapsed = 0f
+    private var score = 0; private var over = false; private var started = false; private var elapsed = 0f; private var missedBubbles = 0
     private var playerX = .5f; private var playerY = .82f; private var lane = 1; private var jump = 0f
     private var moveX = 0; private var moveY = 0; private var tick = 0f; private var shotTick = 0f
     private data class Obj(var x: Float, var y: Float, var type: Int = 0, var alive: Boolean = true)
@@ -43,7 +43,7 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
     private val mapWalls = setOf("1,3","2,3","3,3","5,2","6,2","7,2","2,5","3,5","5,5","6,5","1,7","2,7","4,7","5,7","7,8","6,8","3,9","4,9","5,9")
     init { isFocusable = true; reset() }
     private fun reset() {
-        stopLoop(); score=0; over=false; started=false; elapsed=0f; playerX=.5f; playerY=.82f; lane=1; jump=0f; moveX=0; moveY=0; tick=0f; shotTick=0f; objects.clear(); bullets.clear(); dots.clear(); walls.clear(); ghosts.clear(); gx=1; gy=1; keys=0
+        stopLoop(); score=0; over=false; started=false; elapsed=0f; missedBubbles=0; playerX=.5f; playerY=.82f; lane=1; jump=0f; moveX=0; moveY=0; tick=0f; shotTick=0f; objects.clear(); bullets.clear(); dots.clear(); walls.clear(); ghosts.clear(); gx=1; gy=1; keys=0
         if (mode==MotionGame.PACMAN || mode==MotionGame.GHOST || mode==MotionGame.BALL || mode==MotionGame.ESCAPE) {
             for (y in 0 until gridH) for (x in 0 until gridW) {
                 if (x==0 || y==0 || x==gridW-1 || y==gridH-1 || "${x},${y}" in mapWalls) walls.add(x to y)
@@ -82,20 +82,43 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
                     if ((nx to ny) !in walls){gx=nx;gy=ny; if(dots.remove(gx to gy)) addScore(if(mode==MotionGame.ESCAPE)2 else 1); if(mode==MotionGame.ESCAPE && gx==7&&gy==10&&score>=5){endGame()} }
                     ghosts.indices.forEach { i -> val (x,y)=ghosts[i]; val opts=listOf(x+1 to y,x-1 to y,x to y+1,x to y-1).filter{it !in walls}; if(opts.isNotEmpty()){ val target=opts.minByOrNull{abs(it.first-gx)+abs(it.second-gy)}!!; ghosts[i]=if(Random.nextFloat()<.65f) target else opts.random() } }
                     if(ghosts.any{it.first==gx&&it.second==gy}) endGame()
-                    if(dots.isEmpty() && mode!=MotionGame.ESCAPE) { addScore(10); for(y in 1 until gridH-1) for(x in 1 until gridW-1) if ((x to y) !in walls && !(x==gx&&y==gy)) dots.add(x to y) }
+                    if(dots.isEmpty() && mode==MotionGame.PACMAN) { addScore(10); endGame() }
                 }
             }
             MotionGame.JUNGLE -> {
-                if(jump>0f) jump=(jump-dt*1.6f).coerceAtLeast(0f)
-                if(tick>.95f){tick=0f;objects.add(Obj(1.08f,.78f,1))}
-                objects.forEach{it.x-=.55f*dt}
-                if(objects.any{it.x<.24f&&it.x>.08f&&jump<.35f}) endGame()
-                objects.removeAll{if(it.x<-.1f){addScore();true}else false}
+                // A jump is a fixed-duration arc. Touching and holding the screen
+                // cannot refresh it; the player must land before jumping again.
+                if (jump > 0f) jump = (jump - dt * 1.6f).coerceAtLeast(0f)
+                if (tick > 1.1f) {
+                    tick = 0f
+                    objects.add(Obj(1.08f, .78f, 1))
+                }
+                objects.forEach { it.x -= .65f * dt }
+                // The trunk overlaps the runner between x=.08 and x=.26.
+                // The jump must still be high when that overlap occurs.
+                if (objects.any { it.x < .26f && it.x + .14f > .16f && jump < .35f }) endGame()
+                objects.removeAll { if (it.x < -.15f) { addScore(); true } else false }
             }
             MotionGame.BUBBLES -> {
-                if(tick>.45f){tick=0f;objects.add(Obj(Random.nextFloat()*.9f+.05f,-.04f))}
-                objects.forEach{it.y+=.32f*dt}
-                objects.removeAll{if(it.y>.83f&&abs(it.x-playerX)<.12f){addScore();true}else if(it.y>1.05f) true else false}
+                // Blue bubbles are targets; red bubbles are toxic. Missing three targets or
+                // catching a toxic bubble ends the round, so standing still cannot win.
+                if(tick>.62f){
+                    tick=0f
+                    objects.add(Obj(Random.nextFloat()*.84f+.08f,-.04f,if(Random.nextFloat()<.24f)1 else 0))
+                }
+                val speed=.28f+minOf(.28f,score*.008f)
+                objects.forEach{it.y+=speed*dt}
+                val iterator=objects.iterator()
+                while(iterator.hasNext()){
+                    val bubble=iterator.next()
+                    if(bubble.y>=.83f && abs(bubble.x-playerX)<.13f){
+                        if(bubble.type==1){endGame()} else {addScore(); if(score>=15) endGame()}
+                        iterator.remove()
+                    } else if(bubble.y>1.02f){
+                        if(bubble.type==0){missedBubbles++; if(missedBubbles>=3) endGame()}
+                        iterator.remove()
+                    }
+                }
             }
         }
         if (elapsed>120f) endGame()
@@ -129,7 +152,10 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
             }
             MotionGame.BUBBLES -> {
                 c.drawRoundRect(playerX*w-w*.12f,h*.84f,playerX*w+w*.12f,h*.89f,12f,12f,cyan)
-                objects.forEach{c.drawCircle(it.x*w,it.y*h,w*.035f,if(it.y%0.1f>.05f)purple else yellow)}
+                objects.forEach{c.drawCircle(it.x*w,it.y*h,w*.035f,if(it.type==1)red else cyan)}
+                p.color=white.color;p.textSize=w*.038f;p.textAlign=Paint.Align.RIGHT
+                c.drawText("الفائت: $missedBubbles/3",w*.96f,h*.07f,p)
+                p.textAlign=Paint.Align.LEFT
             }
         }
         p.color=white.color;p.textSize=w*.045f;p.textAlign=Paint.Align.LEFT;c.drawText("النقاط: $score",w*.04f,h*.07f,p)
@@ -137,12 +163,12 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
     }
     private fun drawCar(c:Canvas,x:Float,y:Float,size:Float,paint:Paint){c.drawRoundRect(x-size*.36f,y-size*.58f,x+size*.36f,y+size*.58f,10f,10f,paint);c.drawRoundRect(x-size*.24f,y-size*.35f,x+size*.24f,y-size*.05f,5f,5f,white);c.drawRect(x-size*.4f,y-size*.38f,x-size*.31f,y-size*.18f,white);c.drawRect(x+size*.31f,y-size*.38f,x+size*.4f,y-size*.18f,white)}
     override fun onTouchEvent(e:MotionEvent):Boolean{
-        when(e.action){MotionEvent.ACTION_DOWN->{grab();touchX=e.x;touchY=e.y;if(!started||over){startGame();return true}; if(mode==MotionGame.JUNGLE){jump=1f}; if(mode==MotionGame.PACMAN||mode==MotionGame.GHOST||mode==MotionGame.BALL||mode==MotionGame.ESCAPE){moveX=0;moveY=0}; return true}
+        when(e.action){MotionEvent.ACTION_DOWN->{grab();touchX=e.x;touchY=e.y;if(!started||over){startGame();return true}; if(mode==MotionGame.JUNGLE && jump <= 0f){jump=1f}; if(mode==MotionGame.PACMAN||mode==MotionGame.GHOST||mode==MotionGame.BALL||mode==MotionGame.ESCAPE){moveX=0;moveY=0}; return true}
             MotionEvent.ACTION_UP->{val dx=e.x-touchX;val dy=e.y-touchY
                 when(mode){MotionGame.CAR,MotionGame.BIKE,MotionGame.RIVER->{if(abs(dx)>dp(18)) lane=(lane+if(dx>0)1 else -1).coerceIn(0,2) else lane=when{e.x<width/3f->(lane-1).coerceAtLeast(0);e.x>width*2/3f->(lane+1).coerceAtMost(2);else->lane}}
                     MotionGame.PACMAN,MotionGame.GHOST,MotionGame.BALL,MotionGame.ESCAPE->{if(abs(dx)>abs(dy)){moveX=if(dx>0)1 else -1;moveY=0}else{moveY=if(dy>0)1 else -1;moveX=0}}
                     MotionGame.SPACE,MotionGame.BUBBLES->{playerX=(e.x/width).coerceIn(.08f,.92f)}
-                    MotionGame.JUNGLE->{jump=1f}
+                    MotionGame.JUNGLE -> { /* القفز يبدأ عند لمس الشاشة، ولا يتغير عند رفع الإصبع */ }
                 };return true}
             MotionEvent.ACTION_MOVE->{if(mode==MotionGame.SPACE||mode==MotionGame.BUBBLES)playerX=(e.x/width).coerceIn(.08f,.92f);return true}}
         return true

@@ -65,14 +65,9 @@
 
         <activity android:name=".CarRaceActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".PacManActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".GhostMazeActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SpaceShooterActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BikeRaceActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".RiverRunActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BallMazeActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".JungleRunnerActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".BubbleCatchActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MazeEscapeActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

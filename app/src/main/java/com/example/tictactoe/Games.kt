@@ -52,13 +52,8 @@ object Games {
         GameInfo("⚡", "الحساب السريع", QuickMathActivity::class.java),
         GameInfo("🏎️", "سباق السيارات", CarRaceActivity::class.java),
         GameInfo("🟡", "متاهة آكل النقاط", PacManActivity::class.java),
-        GameInfo("👻", "مطاردة الأشباح", GhostMazeActivity::class.java),
         GameInfo("🚀", "مدافع الفضاء", SpaceShooterActivity::class.java),
-        GameInfo("🚴", "سباق الدراجات", BikeRaceActivity::class.java),
-        GameInfo("🛶", "مغامرة النهر", RiverRunActivity::class.java),
-        GameInfo("🔮", "متاهة الكرة", BallMazeActivity::class.java),
         GameInfo("🌴", "عدّاء الغابة", JungleRunnerActivity::class.java),
-        GameInfo("🫧", "جامع الفقاعات", BubbleCatchActivity::class.java),
-        GameInfo("🗝️", "الهروب من المتاهة", MazeEscapeActivity::class.java)
+        GameInfo("🫧", "تحدي الفقاعات السامة", BubbleCatchActivity::class.java),
     )
 }

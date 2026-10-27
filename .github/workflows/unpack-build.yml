@@ -48,7 +48,7 @@ jobs:
 
       - name: Build debug APK
         run: gradle :app:assembleDebug
-     //   run: gradle assembleDebug
+     
 
       - name: Upload APK
         uses: actions/upload-artifact@v4

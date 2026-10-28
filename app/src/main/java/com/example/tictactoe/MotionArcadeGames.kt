@@ -146,16 +146,49 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
             }
             MotionGame.PACMAN, MotionGame.GHOST, MotionGame.BALL, MotionGame.ESCAPE -> {
                 val cell=minOf(w/gridW,h/gridH); val ox=(w-cell*gridW)/2; val oy=(h-cell*gridH)/2
-                walls.forEach{(x,y)->c.drawRoundRect(ox+x*cell+2,oy+y*cell+2,ox+(x+1)*cell-2,oy+(y+1)*cell-2,7f,7f,cyan)}
-                dots.forEach{(x,y)->c.drawCircle(ox+(x+.5f)*cell,oy+(y+.5f)*cell,cell*.07f,yellow)}
-                ghosts.forEach{(x,y)->c.drawCircle(ox+(x+.5f)*cell,oy+(y+.5f)*cell,cell*.31f,red)}
-                if(mode==MotionGame.ESCAPE){p.color=green.color;c.drawRect(ox+7.5f*cell,oy+10.5f*cell,ox+8f*cell,oy+11f*cell,p)}
+                // Recessed maze cells with subtle inner highlights.
+                walls.forEach{(x,y)->
+                    c.drawRoundRect(ox+x*cell+2,oy+y*cell+2,ox+(x+1)*cell-2,oy+(y+1)*cell-2,cell*.12f,cell*.12f,cyan)
+                    p.color=Color.argb(95,255,255,255);p.style=Paint.Style.STROKE;p.strokeWidth=cell*.025f
+                    c.drawRoundRect(ox+x*cell+cell*.09f,oy+y*cell+cell*.09f,ox+(x+1)*cell-cell*.09f,oy+(y+1)*cell-cell*.09f,cell*.10f,cell*.10f,p);p.style=Paint.Style.FILL
+                }
+                dots.forEach{(x,y)->
+                    val dx=ox+(x+.5f)*cell;val dy=oy+(y+.5f)*cell
+                    p.color=Color.argb(55,255,218,70);c.drawCircle(dx,dy,cell*.15f,p)
+                    c.drawCircle(dx,dy,cell*.065f,yellow);c.drawCircle(dx-cell*.02f,dy-cell*.025f,cell*.022f,white)
+                }
+                ghosts.forEach{(x,y)-> GameGraphics.drawGhost(c,ox+(x+.5f)*cell,oy+(y+.5f)*cell,cell*.30f,elapsed,if(mode==MotionGame.ESCAPE)Color.rgb(188,105,255) else red.color) }
+                if(mode==MotionGame.ESCAPE){
+                    p.color=green.color
+                    c.drawRoundRect(ox+7.42f*cell,oy+10.42f*cell,ox+8f*cell,oy+11f*cell,cell*.10f,cell*.10f,p)
+                    p.color=Color.WHITE;p.style=Paint.Style.STROKE;p.strokeWidth=cell*.04f
+                    c.drawRoundRect(ox+7.48f*cell,oy+10.48f*cell,ox+7.94f*cell,oy+10.94f*cell,cell*.08f,cell*.08f,p);p.style=Paint.Style.FILL
+                }
                 val px=ox+(gx+.5f)*cell;val py=oy+(gy+.5f)*cell
-                if(mode==MotionGame.BALL)c.drawCircle(px,py,cell*.28f,purple) else {c.drawCircle(px,py,cell*.34f,yellow);p.color=Color.BLACK;c.drawCircle(px+cell*.1f,py-cell*.1f,cell*.04f,p)}
+                if(mode==MotionGame.BALL){
+                    c.drawCircle(px,py+cell*.035f,cell*.29f,p.apply{color=Color.argb(80,0,0,0)})
+                    c.drawCircle(px,py,cell*.28f,purple)
+                    c.drawCircle(px-cell*.08f,py-cell*.09f,cell*.075f,white)
+                    p.color=Color.argb(80,255,255,255);p.style=Paint.Style.STROKE;p.strokeWidth=cell*.025f;c.drawCircle(px,py,cell*.24f,p);p.style=Paint.Style.FILL
+                } else if(mode==MotionGame.PACMAN){
+                    val mouth=(.10f+.36f*((kotlin.math.sin(elapsed*12f)+1f)*.5f))*180f
+                    p.color=yellow.color
+                    c.drawArc(RectF(px-cell*.34f,py-cell*.34f,px+cell*.34f,py+cell*.34f),mouth/2f,360f-mouth,true,p)
+                    p.color=Color.rgb(34,39,55);c.drawCircle(px+cell*.09f,py-cell*.16f,cell*.045f,p)
+                } else {
+                    c.drawCircle(px,py,cell*.34f,yellow)
+                    c.drawCircle(px+cell*.10f,py-cell*.10f,cell*.10f,white)
+                    p.color=Color.BLACK;c.drawCircle(px+cell*.12f,py-cell*.08f,cell*.045f,p)
+                }
             }
             MotionGame.JUNGLE -> {
-                c.drawRect(0f,h*.83f,w,h,road); objects.forEach{c.drawRoundRect(it.x*w,h*.74f,it.x*w+w*.14f,h*.84f,8f,8f,red)}
-                c.drawCircle(w*.22f,h*(.75f-jump*.5f),w*.055f,green); c.drawRect(w*.18f,h*(.77f-jump*.5f),w*.26f,h*(.84f-jump*.5f),cyan)
+                c.drawRect(0f,h*.83f,w,h,road);c.drawRect(0f,h*.83f,w,h*.85f,paint(Color.rgb(100,116,139)))
+                objects.forEach{obj->
+                    c.drawOval(obj.x*w,h*.81f,obj.x*w+w*.16f,h*.86f,paint(Color.argb(75,0,0,0)))
+                    c.drawRoundRect(obj.x*w,h*.74f,obj.x*w+w*.14f,h*.84f,8f,8f,red)
+                    c.drawLine(obj.x*w+w*.04f,h*.76f,obj.x*w+w*.04f,h*.82f,paint(Color.argb(90,255,255,255)).apply{strokeWidth=w*.008f})
+                }
+                GameGraphics.drawRunner(c,w*.22f,h*.83f,w*.10f,elapsed,jump*h*.38f)
             }
             MotionGame.BUBBLES -> {
                 c.drawRoundRect(playerX*w-w*.12f,h*.84f,playerX*w+w*.12f,h*.89f,12f,12f,cyan)
@@ -168,7 +201,22 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
         p.color=white.color;p.textSize=w*.045f;p.textAlign=Paint.Align.LEFT;c.drawText("النقاط: $score",w*.04f,h*.07f,p)
         if(!started||over){p.color=Color.argb(210,0,0,0);c.drawRoundRect(w*.08f,h*.37f,w*.92f,h*.61f,18f,18f,p);p.color=white.color;p.textAlign=Paint.Align.CENTER;p.textSize=w*.052f;c.drawText(if(over)"انتهت اللعبة — $score" else "المس الشاشة لبدء اللعب",w*.5f,h*.48f,p);p.textSize=w*.032f;c.drawText("${mode.hint}",w*.5f,h*.54f,p)}
     }
-    private fun drawCar(c:Canvas,x:Float,y:Float,size:Float,paint:Paint){c.drawRoundRect(x-size*.36f,y-size*.58f,x+size*.36f,y+size*.58f,10f,10f,paint);c.drawRoundRect(x-size*.24f,y-size*.35f,x+size*.24f,y-size*.05f,5f,5f,white);c.drawRect(x-size*.4f,y-size*.38f,x-size*.31f,y-size*.18f,white);c.drawRect(x+size*.31f,y-size*.38f,x+size*.4f,y-size*.18f,white)}
+    private fun drawCar(c:Canvas,x:Float,y:Float,size:Float,body:Paint){
+        // Tires, chassis, windshield, reflections and lights give the cars more depth.
+        val tire=paint(Color.rgb(17,24,39));val rim=paint(Color.rgb(148,163,184))
+        c.drawRoundRect(x-size*.43f,y-size*.40f,x-size*.28f,y-size*.12f,4f,4f,tire)
+        c.drawRoundRect(x+size*.28f,y-size*.40f,x+size*.43f,y-size*.12f,4f,4f,tire)
+        c.drawRoundRect(x-size*.43f,y+size*.18f,x-size*.28f,y+size*.43f,4f,4f,tire)
+        c.drawRoundRect(x+size*.28f,y+size*.18f,x+size*.43f,y+size*.43f,4f,4f,tire)
+        c.drawRoundRect(x-size*.36f,y-size*.60f,x+size*.36f,y+size*.60f,size*.13f,size*.13f,body)
+        c.drawRoundRect(x-size*.24f,y-size*.36f,x+size*.24f,y-size*.04f,size*.07f,size*.07f,paint(Color.rgb(147,220,245)))
+        c.drawRoundRect(x-size*.22f,y+size*.06f,x+size*.22f,y+size*.32f,size*.05f,size*.05f,paint(Color.rgb(30,41,59)))
+        c.drawRoundRect(x-size*.29f,y-size*.52f,x-size*.20f,y-size*.30f,size*.03f,size*.03f,white)
+        c.drawRoundRect(x+size*.20f,y-size*.52f,x+size*.29f,y-size*.30f,size*.03f,size*.03f,white)
+        c.drawRoundRect(x-size*.28f,y+size*.43f,x-size*.12f,y+size*.51f,size*.03f,size*.03f,paint(Color.rgb(255,241,170)))
+        c.drawRoundRect(x+size*.12f,y+size*.43f,x+size*.28f,y+size*.51f,size*.03f,size*.03f,paint(Color.rgb(255,241,170)))
+        c.drawLine(x-size*.20f,y-size*.47f,x-size*.20f,y-size*.34f,paint(Color.argb(90,255,255,255)).apply{strokeWidth=size*.025f})
+    }
     override fun onTouchEvent(e:MotionEvent):Boolean{
         when(e.action){MotionEvent.ACTION_DOWN->{grab();touchX=e.x;touchY=e.y;if(!started||over){startGame();return true}; if(mode==MotionGame.JUNGLE && jump <= 0f){jump=1f}; if(mode==MotionGame.PACMAN||mode==MotionGame.GHOST||mode==MotionGame.BALL||mode==MotionGame.ESCAPE){moveX=0;moveY=0}; return true}
             MotionEvent.ACTION_UP->{val dx=e.x-touchX;val dy=e.y-touchY

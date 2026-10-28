@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.os.Bundle
 import android.view.MotionEvent
 import android.widget.TextView
@@ -91,12 +92,12 @@ class HurdleView(
 
         // الاصطدام
         val groundY = h * 0.8f
-        val s = w * 0.09f
+        val s = w * 0.105f
         val rx = w * 0.2f
         val rLeft = rx - s * 0.3f
         val rRight = rx + s * 0.3f
         val rBottom = groundY - offset
-        val rTop = rBottom - s * 0.9f
+        val rTop = rBottom - s * 1.1f
         for (o in hurdles) {
             val oLeft = o[0]
             val oRight = o[0] + o[1]
@@ -116,21 +117,22 @@ class HurdleView(
         canvas.drawRoundRect(0f, 0f, w, h, 24f, 24f, bgP)
         canvas.drawRect(0f, groundY, w, h, groundP)
 
+        // Track markings and a subtle ground highlight make the play area easier to read.
+        canvas.drawRect(0f,groundY,w,groundY+h*.012f,paint(Color.rgb(100,116,139)))
         for (o in hurdles) {
             val top = groundY - o[2]
-            canvas.drawRoundRect(o[0], top, o[0] + o[1], groundY, 6f, 6f, hurdleP)
-            canvas.drawRect(o[0], top + o[2] * 0.25f, o[0] + o[1], top + o[2] * 0.45f, stripeP)
+            GameGraphics.drawHurdle(canvas,o[0],top,o[0]+o[1],groundY,dist)
         }
 
-        val s = w * 0.09f
-        textP.textSize = s * 1.3f
+        val s = w * 0.105f
         val runnerX = w * 0.2f
-        val runnerY = groundY - offset - s * 0.05f
-        // Mirror the runner so the character faces and runs toward the left.
-        canvas.save()
-        canvas.scale(-1f, 1f, runnerX, runnerY - s * 0.45f)
-        canvas.drawText("🏃", runnerX, runnerY, textP)
-        canvas.restore()
+        GameGraphics.drawRunner(canvas,runnerX,groundY,s,dist,offset)
+        // The dotted arc shows the useful jump window relative to the next obstacle.
+        val next = hurdles.firstOrNull { it[0] > runnerX }
+        if (next != null && next[0]-runnerX < w*.43f) {
+            val jumpPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color=Color.argb(150,250,204,21); style=Paint.Style.STROKE; strokeWidth=w*.004f; pathEffect=android.graphics.DashPathEffect(floatArrayOf(w*.018f,w*.014f),0f) }
+            canvas.drawArc(RectF(runnerX-s*.45f,groundY-s*2.1f,runnerX+s*2.8f,groundY+s*.1f),205f,130f,false,jumpPaint)
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

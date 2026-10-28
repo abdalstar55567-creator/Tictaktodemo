@@ -118,12 +118,16 @@ class TowerView(
             val y = h - (i + 1) * bh + camera
             if (y > h || y + bh < 0f) continue
             blockP.color = blockColor(i)
+            canvas.drawRoundRect(stack[i][0]+3f, y+3f, stack[i][0] + stack[i][1]+3f, y + bh+1f, 8f, 8f, paint(Color.argb(75,0,0,0)))
             canvas.drawRoundRect(stack[i][0], y, stack[i][0] + stack[i][1], y + bh - 2f, 8f, 8f, blockP)
+            canvas.drawRoundRect(stack[i][0]+4f,y+2f,stack[i][0]+stack[i][1]-4f,y+bh*.22f,5f,5f,paint(Color.argb(90,255,255,255)))
         }
 
         if (state == 0 || state == 1) {
             blockP.color = blockColor(stack.size)
+            canvas.drawRoundRect(mx+3f,my+3f,mx+cw+3f,my+bh+1f,8f,8f,paint(Color.argb(75,0,0,0)))
             canvas.drawRoundRect(mx, my, mx + cw, my + bh - 2f, 8f, 8f, blockP)
+            canvas.drawRoundRect(mx+4f,my+2f,mx+cw-4f,my+bh*.22f,5f,5f,paint(Color.argb(90,255,255,255)))
         }
     }
 

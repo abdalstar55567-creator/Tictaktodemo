@@ -147,6 +147,9 @@ class BrickView(
         val w = width.toFloat()
         val h = height.toFloat()
         canvas.drawRoundRect(0f, 0f, w, h, 24f, 24f, bgP)
+        val gridPaint=paint(Color.argb(22,148,163,184)); gridPaint.strokeWidth=1f
+        for(i in 1..7) canvas.drawLine(w*i/8f,0f,w*i/8f,h,gridPaint)
+        for(i in 1..8) canvas.drawLine(0f,h*i/9f,w,h*i/9f,gridPaint)
 
         val margin = w * 0.03f
         val bw = (w - margin * 2f) / cols
@@ -158,14 +161,20 @@ class BrickView(
                 brickP.color = rowColors[row]
                 val left = margin + col * bw
                 val top = top0 + row * (bh + 4f)
+                canvas.drawRoundRect(left, top, left + bw - 4f, top + bh, 6f, 6f, paint(Color.argb(65,0,0,0)))
                 canvas.drawRoundRect(left, top, left + bw - 4f, top + bh, 6f, 6f, brickP)
+                canvas.drawRoundRect(left+3f,top+2f,left+bw-8f,top+bh*.30f,4f,4f,paint(Color.argb(85,255,255,255)))
             }
         }
 
         val pw = w * 0.22f
         val ph = h * 0.022f
+        canvas.drawRoundRect(px - pw / 2f, h * 0.92f, px + pw / 2f, h * 0.92f + ph, 8f, 8f, paint(Color.argb(80,0,0,0)))
         canvas.drawRoundRect(px - pw / 2f, h * 0.92f, px + pw / 2f, h * 0.92f + ph, 8f, 8f, paddleP)
+        canvas.drawRoundRect(px-pw*.40f,h*.922f,px+pw*.40f,h*.926f,3f,3f,paint(Color.rgb(125,211,252)))
+        canvas.drawCircle(bx, by, w * 0.032f, paint(Color.argb(55,250,204,21)))
         canvas.drawCircle(bx, by, w * 0.022f, ballP)
+        canvas.drawCircle(bx-w*.006f,by-w*.006f,w*.006f,paint(Color.WHITE))
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

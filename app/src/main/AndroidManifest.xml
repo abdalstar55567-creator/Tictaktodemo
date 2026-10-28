@@ -68,6 +68,14 @@
         <activity android:name=".SpaceShooterActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".JungleRunnerActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".BubbleCatchActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".SokobanActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".HanoiActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MastermindActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".NimStrategyActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".PegSolitaireActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".RiverCrossingActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".NonogramActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".PipeConnectActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

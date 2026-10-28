@@ -55,5 +55,13 @@ object Games {
         GameInfo("🚀", "مدافع الفضاء", SpaceShooterActivity::class.java),
         GameInfo("🌴", "عدّاء الغابة", JungleRunnerActivity::class.java),
         GameInfo("🫧", "تحدي الفقاعات السامة", BubbleCatchActivity::class.java),
+        GameInfo("📦", "دافع الصناديق", SokobanActivity::class.java),
+        GameInfo("🗼", "أبراج هانوي", HanoiActivity::class.java),
+        GameInfo("🔐", "فك الشفرة", MastermindActivity::class.java),
+        GameInfo("🪵", "تحدي الأعواد", NimStrategyActivity::class.java),
+        GameInfo("🟣", "قفز القطع", PegSolitaireActivity::class.java),
+        GameInfo("🌊", "عبور النهر", RiverCrossingActivity::class.java),
+        GameInfo("❤️", "لغز الصورة المخفية", NonogramActivity::class.java),
+        GameInfo("🚰", "وصل الأنابيب", PipeConnectActivity::class.java),
     )
 }

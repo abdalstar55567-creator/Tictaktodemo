@@ -85,12 +85,14 @@ class Game2048Activity : BaseGameActivity() {
         }
         content.addView(board, lp(width = android.view.ViewGroup.LayoutParams.WRAP_CONTENT))
 
-        val pad = row()
-        pad.addView(button("⬅", false) { move(0) }, weightLp(dp(50)))
-        pad.addView(button("⬆", false) { move(2) }, weightLp(dp(50)))
-        pad.addView(button("⬇", false) { move(3) }, weightLp(dp(50)))
-        pad.addView(button("➡", false) { move(1) }, weightLp(dp(50)))
-        content.addView(pad, lp(top = dp(14)))
+        content.addView(Ui.directionPad(this) { dx, dy ->
+            when {
+                dx < 0 -> move(0)
+                dx > 0 -> move(1)
+                dy < 0 -> move(2)
+                else -> move(3)
+            }
+        }, lp(top = dp(6)))
 
         content.addView(button("لعبة جديدة") { newGame() }, lp(height = dp(48), top = dp(12)))
         newGame()

@@ -200,26 +200,8 @@ class SnakeActivity : BaseGameActivity() {
             lp(top = dp(8))
         )
 
-        // أسهم التحكم
-        val up = button("⬆", false) { snake.turn(0, -1) }
-        val down = button("⬇", false) { snake.turn(0, 1) }
-        val left = button("⬅", false) { snake.turn(-1, 0) }
-        val right = button("➡", false) { snake.turn(1, 0) }
-
-        val pad = LinearLayout(this)
-        pad.orientation = LinearLayout.VERTICAL
-        pad.gravity = android.view.Gravity.CENTER
-
-        pad.addView(up, LinearLayout.LayoutParams(dp(80), dp(52)))
-
-        val mid = row()
-        mid.addView(left, LinearLayout.LayoutParams(dp(80), dp(52)))
-        mid.addView(View(this), LinearLayout.LayoutParams(dp(60), dp(52)))
-        mid.addView(right, LinearLayout.LayoutParams(dp(80), dp(52)))
-        pad.addView(mid)
-
-        pad.addView(down, LinearLayout.LayoutParams(dp(80), dp(52)))
-        content.addView(pad, lp(top = dp(8)))
+        // لوحة اتجاهات موحدة بنفس ألوان وأحجام بقية الألعاب.
+        content.addView(Ui.directionPad(this) { dx, dy -> snake.turn(dx, dy) }, lp(top = dp(4)))
 
         content.addView(button("ابدأ") { snake.start() }, lp(height = dp(50), top = dp(12)))
     }

@@ -106,6 +106,39 @@ object Ui {
         return c
     }
 
+    /** لوحة اتجاهات موحدة لكل الألعاب التي تحتاج حركة في أربعة اتجاهات. */
+    fun directionPad(ctx: Context, onDirection: (dx: Int, dy: Int) -> Unit): LinearLayout {
+        val pad = LinearLayout(ctx).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(dp(ctx, 4), dp(ctx, 2), dp(ctx, 4), dp(ctx, 2))
+        }
+        fun arrow(symbol: String, dx: Int, dy: Int): Button = Button(ctx).apply {
+            text = symbol
+            isAllCaps = false
+            textSize = 22f
+            setTextColor(color(ctx, R.color.text_main))
+            background = panelBg(ctx, android.graphics.Color.rgb(39, 52, 73), 14)
+            minWidth = 0
+            minimumWidth = 0
+            minHeight = 0
+            minimumHeight = 0
+            setPadding(0, 0, 0, 0)
+            layoutParams = LinearLayout.LayoutParams(dp(ctx, 62), dp(ctx, 48)).apply {
+                setMargins(dp(ctx, 4), dp(ctx, 3), dp(ctx, 4), dp(ctx, 3))
+            }
+            setOnClickListener { onDirection(dx, dy) }
+        }
+        pad.addView(arrow("⬆", 0, -1))
+        val middle = LinearLayout(ctx).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
+        middle.addView(arrow("⬅", -1, 0))
+        middle.addView(View(ctx), LinearLayout.LayoutParams(dp(ctx, 48), dp(ctx, 48)))
+        middle.addView(arrow("➡", 1, 0))
+        pad.addView(middle)
+        pad.addView(arrow("⬇", 0, 1))
+        return pad
+    }
+
     fun scroll(ctx: Context, inner: View): ScrollView {
         val s = ScrollView(ctx)
         s.isFillViewport = true

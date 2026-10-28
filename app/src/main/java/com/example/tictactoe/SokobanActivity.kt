@@ -19,8 +19,7 @@ class SokobanActivity : BaseGameActivity() {
         for (y in original.indices) for (x in original[y].indices) if (original[y][x]=='#') walls.add(x to y)
         status=label("ادفع الصندوق 🟫 فوق الهدف 🟢 دون أن تحشره في زاوية.",15f); content.addView(status,lp(top=4,bottom=10))
         board=LinearLayout(this); board.orientation=LinearLayout.VERTICAL; content.addView(board,lp())
-        val controls=listOf("⬆️" to (0 to -1),"⬅️" to (-1 to 0),"⬇️" to (0 to 1),"➡️" to (1 to 0))
-        controls.chunked(2).forEach { pair -> val r=row(); pair.forEach { (t,d)-> r.addView(button(t){ move(d.first,d.second) },weightLp(dp(58))) }; content.addView(r,lp(top=6)) }
+        content.addView(Ui.directionPad(this) { dx, dy -> move(dx, dy) }, lp(top = dp(4)))
         content.addView(button("إعادة المرحلة",false){ reset() },lp(top=8)); drawBoard()
     }
     private fun move(dx:Int,dy:Int){ val nx=player.first+dx; val ny=player.second+dy; if(nx to ny in walls)return

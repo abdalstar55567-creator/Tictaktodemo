@@ -22,11 +22,11 @@ enum class MotionGame(val title: String, val hint: String) {
     BALL("متاهة الكرة", "اسحب الكرة في الاتجاه المطلوب للوصول إلى الهدف"),
     JUNGLE("عدّاء الغابة", "المس الشاشة للقفز فوق جذوع الأشجار"),
     BUBBLES("تحدي الفقاعات السامة", "التقط الفقاعات الزرقاء وتجنب الحمراء؛ ثلاث فقاعات زرقاء فائتة أو لمس حمراء تنهي الجولة"),
-    ESCAPE("الهروب من المتاهة", "اجمع المفاتيح ثم اعثر على المخرج وتجنب الأشباح")
+    ESCAPE("الهروب من الأشباح", "اجمع النقاط ثم اعثر على المخرج وتجنب الأشباح")
 }
 
 class MotionArcadeView(context: Context, private val mode: MotionGame, private val onScore: (Int) -> Unit, private val onOver: (Int) -> Unit) : GameLoopView(context) {
-    override val aspect: Float get() = 1.12f
+    override val aspect: Float get() = 0.90f
     private val bg = paint(Color.rgb(12, 20, 42)); private val road = paint(Color.rgb(45, 55, 75))
     private val white = paint(Color.WHITE); private val cyan = paint(Color.rgb(58, 220, 240))
     private val yellow = paint(Color.rgb(255, 218, 70)); private val red = paint(Color.rgb(255, 85, 105))
@@ -54,6 +54,13 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
         onScore(0); invalidate()
     }
     fun startGame() { if (over) reset(); started=true; over=false; startLoop(); invalidate() }
+    fun moveDirection(dx: Int, dy: Int) {
+        if (mode != MotionGame.PACMAN && mode != MotionGame.GHOST && mode != MotionGame.BALL && mode != MotionGame.ESCAPE) return
+        if (!started || over) startGame()
+        moveX = dx.coerceIn(-1, 1)
+        moveY = dy.coerceIn(-1, 1)
+        invalidate()
+    }
     private fun endGame() { if (!over) { over=true; stopLoop(); onOver(score); invalidate() } }
     private fun addScore(n:Int=1) { score+=n; onScore(score) }
     override fun update(dt: Float) {
@@ -186,7 +193,11 @@ abstract class MotionGameActivity : BaseGameActivity() {
         scoreLabel=label("النقاط: 0",20f);content.addView(scoreLabel,lp(bottom=dp(4)))
         game=MotionArcadeView(this,mode,{s->scoreLabel.text="النقاط: $s"},{s->scoreLabel.text="انتهت اللعبة — النقاط: $s"})
         content.addView(game,lp())
-        content.addView(button("ابدأ / أعد اللعب"){game.startGame()},lp(top=dp(6),bottom=dp(12)))
+        if (mode == MotionGame.PACMAN || mode == MotionGame.GHOST || mode == MotionGame.BALL || mode == MotionGame.ESCAPE) {
+            content.addView(label("أزرار الحركة", 13f, R.color.text_dim, false), lp(top = dp(2), bottom = dp(1)))
+            content.addView(Ui.directionPad(this) { dx, dy -> game.moveDirection(dx, dy) }, lp())
+        }
+        content.addView(button("ابدأ / أعد اللعب"){game.startGame()},lp(top=dp(4),bottom=dp(8)))
     }
     override fun onPause(){if(::game.isInitialized)game.stopLoop();super.onPause()}
 }

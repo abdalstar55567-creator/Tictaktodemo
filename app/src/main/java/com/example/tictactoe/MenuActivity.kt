@@ -2,8 +2,6 @@ package com.example.tictactoe
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.Gravity
-import android.view.View
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -18,37 +16,16 @@ class MenuActivity : AppCompatActivity() {
         setContentView(R.layout.activity_menu)
 
         findViewById<TextView>(R.id.menuCount).text =
-            "${Games.all.size} لعبة متاحة الآن"
+            "${Games.all.size} ألعاب جاهزة — والمزيد قريباً!"
 
         val list = findViewById<LinearLayout>(R.id.gamesList)
-        list.removeAllViews()
-
-        // شبكة مرنة بثلاث بطاقات في الصف، دون تغيير بيانات الألعاب أو طريقة تشغيلها.
-        val columns = 3
-        var row: LinearLayout? = null
-        Games.all.forEachIndexed { index, game ->
-            if (index % columns == 0) {
-                row = LinearLayout(this).apply {
-                    orientation = LinearLayout.HORIZONTAL
-                    gravity = Gravity.CENTER
-                    layoutDirection = View.LAYOUT_DIRECTION_LTR
+        Games.all.forEachIndexed { i, game ->
+            list.addView(
+                Ui.button(this, game.emoji + "   " + game.title, i % 2 == 0, 12, 60) {
+                    Feedback.tap(this)
+                    startActivity(Intent(this, game.cls))
                 }
-                val rowParams = LinearLayout.LayoutParams(
-                    LinearLayout.LayoutParams.MATCH_PARENT,
-                    LinearLayout.LayoutParams.WRAP_CONTENT
-                )
-                rowParams.bottomMargin = Ui.dp(this, 10)
-                list.addView(row, rowParams)
-            }
-
-            val card = GameComponents.gameCard(this, game, index)
-            val cardParams = LinearLayout.LayoutParams(0, Ui.dp(this, 126), 1f)
-            cardParams.setMargins(Ui.dp(this, 4), Ui.dp(this, 3), Ui.dp(this, 4), Ui.dp(this, 3))
-            row?.addView(card, cardParams)
-            card.setOnClickListener {
-                Feedback.tap(this)
-                startActivity(Intent(this, game.cls))
-            }
+            )
         }
 
         soundButton = findViewById(R.id.menuSound)

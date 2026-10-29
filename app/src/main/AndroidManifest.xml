@@ -97,6 +97,16 @@
         <activity android:name=".MemoryEmojiActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".TreasureHuntActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".LuckyWheelActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".CoinCountActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".CrosswalkActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MagnetActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".ClockReadActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".OddWordActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".BeeFlowerActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".BalanceScaleActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".WeatherQuizActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".ArcheryActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".NumberLadderActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

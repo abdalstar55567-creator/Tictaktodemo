@@ -84,5 +84,15 @@ object Games {
         GameInfo("👀", "تذكّر الرمز", MemoryEmojiActivity::class.java),
         GameInfo("💰", "صيد الكنز", TreasureHuntActivity::class.java),
         GameInfo("🎡", "عجلة الحظ", LuckyWheelActivity::class.java),
+        GameInfo("🪙", "عدّ العملات", CoinCountActivity::class.java),
+        GameInfo("🚦", "عبور المشاة", CrosswalkActivity::class.java),
+        GameInfo("🧲", "المغناطيس", MagnetActivity::class.java),
+        GameInfo("🕐", "قراءة الساعة", ClockReadActivity::class.java),
+        GameInfo("🎪", "الغريب عن المجموعة", OddWordActivity::class.java),
+        GameInfo("🐝", "النحلة والزهور", BeeFlowerActivity::class.java),
+        GameInfo("⚖️", "الميزان", BalanceScaleActivity::class.java),
+        GameInfo("🌦️", "تحدّي الطقس", WeatherQuizActivity::class.java),
+        GameInfo("🏹", "الرماية", ArcheryActivity::class.java),
+        GameInfo("🪜", "سلّم الأرقام", NumberLadderActivity::class.java),
     )
 }

@@ -65,9 +65,9 @@
 
         <activity android:name=".CarRaceActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".PacManActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".GhostMazeActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SpaceShooterActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".JungleRunnerActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BubbleCatchActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MazeEscapeActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SokobanActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".HanoiActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".MastermindActivity" android:exported="false" android:screenOrientation="portrait" />

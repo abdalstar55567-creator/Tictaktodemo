@@ -5,13 +5,16 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import android.graphics.LinearGradient
+import android.graphics.Shader
+import android.graphics.Path
 import android.os.Bundle
 import android.view.MotionEvent
 import android.widget.TextView
 import kotlin.math.abs
 import kotlin.random.Random
 
-/** Five distinct touch-first arcade games. No external assets or libraries required. */
+/** Shared touch-first arcade games with hand-drawn Canvas graphics; no external assets required. */
 enum class MotionGame(val title: String, val hint: String) {
     CAR("سباق السيارات", "اسحب يميناً ويساراً لتبديل المسار وتفادي السيارات"),
     PACMAN("متاهة آكل النقاط", "اسحب في اتجاه الحركة واجمع النقاط وابتعد عن الأشباح"),
@@ -22,11 +25,11 @@ enum class MotionGame(val title: String, val hint: String) {
     BALL("متاهة الكرة", "اسحب الكرة في الاتجاه المطلوب للوصول إلى الهدف"),
     JUNGLE("عدّاء الغابة", "المس الشاشة للقفز فوق جذوع الأشجار"),
     BUBBLES("تحدي الفقاعات السامة", "التقط الفقاعات الزرقاء وتجنب الحمراء؛ ثلاث فقاعات زرقاء فائتة أو لمس حمراء تنهي الجولة"),
-    ESCAPE("الهروب من المتاهة", "اجمع المفاتيح ثم اعثر على المخرج وتجنب الأشباح")
+    ESCAPE("الهروب من الأشباح", "اجمع النقاط ثم اعثر على المخرج وتجنب الأشباح")
 }
 
 class MotionArcadeView(context: Context, private val mode: MotionGame, private val onScore: (Int) -> Unit, private val onOver: (Int) -> Unit) : GameLoopView(context) {
-    override val aspect: Float get() = 1.12f
+    override val aspect: Float get() = 0.90f
     private val bg = paint(Color.rgb(12, 20, 42)); private val road = paint(Color.rgb(45, 55, 75))
     private val white = paint(Color.WHITE); private val cyan = paint(Color.rgb(58, 220, 240))
     private val yellow = paint(Color.rgb(255, 218, 70)); private val red = paint(Color.rgb(255, 85, 105))
@@ -35,7 +38,7 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
     private var score = 0; private var over = false; private var started = false; private var elapsed = 0f; private var missedBubbles = 0
     private var playerX = .5f; private var playerY = .82f; private var lane = 1; private var jump = 0f
     private var moveX = 0; private var moveY = 0; private var tick = 0f; private var shotTick = 0f
-    private data class Obj(var x: Float, var y: Float, var type: Int = 0, var alive: Boolean = true)
+    private data class Obj(var x: Float, var y: Float, var type: Int = 0, var alive: Boolean = true, var hp: Int = 1)
     private val objects = mutableListOf<Obj>(); private val bullets = mutableListOf<Obj>()
     private val dots = mutableSetOf<Pair<Int,Int>>(); private val walls = mutableSetOf<Pair<Int,Int>>()
     private val ghosts = mutableListOf<Pair<Int,Int>>(); private val gridW = 9; private val gridH = 12
@@ -54,8 +57,18 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
         onScore(0); invalidate()
     }
     fun startGame() { if (over) reset(); started=true; over=false; startLoop(); invalidate() }
+    fun moveDirection(dx: Int, dy: Int) {
+        if (mode != MotionGame.PACMAN && mode != MotionGame.GHOST && mode != MotionGame.BALL && mode != MotionGame.ESCAPE) return
+        if (!started || over) startGame()
+        moveX = dx.coerceIn(-1, 1)
+        moveY = dy.coerceIn(-1, 1)
+        invalidate()
+    }
     private fun endGame() { if (!over) { over=true; stopLoop(); onOver(score); invalidate() } }
     private fun addScore(n:Int=1) { score+=n; onScore(score) }
+    private fun spaceLevel(): Int = (score / 10 + 1).coerceAtMost(10)
+    /** 1 cannon initially, 2 at 10 points, 3 at 25 points. */
+    private fun weaponLevel(): Int = when { score >= 25 -> 3; score >= 10 -> 2; else -> 1 }
     override fun update(dt: Float) {
         if (!started || over) return
         elapsed += dt; tick += dt; shotTick += dt
@@ -69,11 +82,35 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
                 objects.removeAll { if(it.y>1.08f) { if(it.alive) addScore(); true } else false }
             }
             MotionGame.SPACE -> {
-                if (shotTick>.25f) { shotTick=0f; bullets.add(Obj(playerX,.73f)) }
-                if (tick>.55f) { tick=0f; objects.add(Obj(Random.nextFloat()*.84f+.08f,-.06f)) }
-                bullets.forEach { it.y-=.85f*dt }; objects.forEach { it.y+=.28f*dt }
-                for (b in bullets) for (e in objects) if(b.alive&&e.alive&&abs(b.x-e.x)<.06f&&abs(b.y-e.y)<.07f){b.alive=false;e.alive=false;addScore(2)}
-                if(objects.any{it.alive&&it.y>.78f&&abs(it.x-playerX)<.09f}) endGame()
+                val level = spaceLevel()
+                val weapon = weaponLevel()
+                val fireDelay = (0.30f - level * 0.012f).coerceAtLeast(0.13f)
+                if (shotTick > fireDelay) {
+                    shotTick = 0f
+                    val spread = when (weapon) {
+                        1 -> listOf(0f)
+                        2 -> listOf(-.035f, .035f)
+                        else -> listOf(-.055f, 0f, .055f)
+                    }
+                    spread.forEach { offset -> bullets.add(Obj((playerX + offset).coerceIn(.04f,.96f), .75f)) }
+                }
+                val spawnDelay = (0.72f - level * 0.045f).coerceAtLeast(0.28f)
+                if (tick > spawnDelay) {
+                    tick = 0f
+                    val enemyX = Random.nextFloat() * .82f + .09f
+                    // Later levels introduce tougher targets that require multiple hits.
+                    objects.add(Obj(enemyX, -.07f, if (level >= 4 && Random.nextFloat() < .28f) 1 else 0, true, if (level >= 3) 2 else 1))
+                }
+                bullets.forEach { it.y -= (0.88f + level * .035f).coerceAtMost(1.25f) * dt }
+                objects.forEach { it.y += (0.23f + level * .025f).coerceAtMost(.55f) * dt }
+                for (b in bullets) for (e in objects) {
+                    if (b.alive && e.alive && abs(b.x-e.x) < (if (e.type == 1) .075f else .06f) && abs(b.y-e.y) < .075f) {
+                        b.alive = false
+                        e.hp--
+                        if (e.hp <= 0) { e.alive = false; addScore(2 + level) }
+                    }
+                }
+                if(objects.any{it.alive&&it.y>.79f&&abs(it.x-playerX)<.095f}) endGame()
                 bullets.removeAll{!it.alive||it.y<-.1f}; objects.removeAll{!it.alive||it.y>1.1f}
             }
             MotionGame.PACMAN, MotionGame.GHOST, MotionGame.BALL, MotionGame.ESCAPE -> {
@@ -124,31 +161,112 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
         if (elapsed>120f) endGame()
     }
     override fun onDraw(c: Canvas) {
-        val w=width.toFloat(); val h=height.toFloat(); c.drawColor(bg.color)
+        val w=width.toFloat(); val h=height.toFloat()
+        val isMaze = mode==MotionGame.PACMAN || mode==MotionGame.GHOST || mode==MotionGame.BALL || mode==MotionGame.ESCAPE
+        p.shader = LinearGradient(0f,0f,0f,h,
+            if (isMaze) intArrayOf(Color.rgb(8,16,42),Color.rgb(20,32,70),Color.rgb(31,24,67))
+            else intArrayOf(Color.rgb(15,49,91),Color.rgb(61,133,170),Color.rgb(154,206,207)),
+            null,Shader.TileMode.CLAMP)
+        c.drawRect(0f,0f,w,h,p);p.shader=null
+        if (!isMaze && mode != MotionGame.SPACE && mode != MotionGame.CAR && mode != MotionGame.BIKE && mode != MotionGame.RIVER) {
+            val cloud = paint(Color.argb(80,255,255,255))
+            for(i in 0..3){val cx=w*((i*.29f+.12f-elapsed*.008f)%1.2f);val cy=h*(.16f+(i%2)*.09f);c.drawOval(cx-w*.06f,cy-h*.015f,cx+w*.06f,cy+h*.015f,cloud);c.drawCircle(cx,cy-h*.01f,h*.018f,cloud)}
+        }
         when(mode) {
             MotionGame.CAR, MotionGame.BIKE, MotionGame.RIVER -> {
-                c.drawRect(w*.12f,0f,w*.88f,h,road)
-                for(i in 1..2) for(y in 0..8) c.drawRect(w*(.12f+i*.253f)-3f, h*(y/9f)+(elapsed*120%h), w*(.12f+i*.253f)+3f,h*(y/9f)+(elapsed*120%h)+h*.06f,white)
-                objects.forEach{ drawCar(c,it.x*w,it.y*h,w*.12f,if(it.type==1)purple else red) }
-                drawCar(c, w*(lane+.5f)/3f,h*.82f,w*.13f,if(mode==MotionGame.RIVER)cyan else green)
+                // Bright sky, rolling green shoulders, reflective road and animated lane markers.
+                p.shader = LinearGradient(0f,0f,0f,h*.55f,
+                    intArrayOf(Color.rgb(22,78,125),Color.rgb(83,170,196),Color.rgb(195,226,220)),null,Shader.TileMode.CLAMP)
+                c.drawRect(0f,0f,w,h*.55f,p); p.shader = null
+                c.drawRect(0f,h*.35f,w,h,paint(Color.rgb(42,132,79)))
+                val hill = Path().apply { moveTo(0f,h*.43f); cubicTo(w*.22f,h*.27f,w*.35f,h*.47f,w*.53f,h*.36f); cubicTo(w*.73f,h*.25f,w*.86f,h*.45f,w,h*.33f); lineTo(w,h*.57f);lineTo(0f,h*.57f);close() }
+                c.drawPath(hill,paint(Color.rgb(74,158,105)))
+                val roadPath = Path().apply { moveTo(w*.25f,0f); lineTo(w*.75f,0f); lineTo(w*.98f,h); lineTo(w*.02f,h); close() }
+                p.shader = LinearGradient(0f,0f,w,0f,intArrayOf(Color.rgb(35,43,57),Color.rgb(73,83,99),Color.rgb(35,43,57)),null,Shader.TileMode.CLAMP)
+                c.drawPath(roadPath,p); p.shader = null
+                c.drawLine(w*.25f,0f,w*.02f,h,paint(Color.rgb(239,224,178)).apply{strokeWidth=w*.012f})
+                c.drawLine(w*.75f,0f,w*.98f,h,paint(Color.rgb(239,224,178)).apply{strokeWidth=w*.012f})
+                val scroll=(elapsed*0.72f)%0.22f
+                for(i in 0..7){ val y=((i*.22f+scroll)%1.15f)*h; val widthAtY=w*(.012f+.025f*y/h); for(laneMark in 1..2){ val x=w*(.25f+laneMark*.166f)+ (y/h-.5f)*w*.166f; c.drawRoundRect(x-widthAtY,y,x+widthAtY,y+h*(.035f+.025f*y/h),widthAtY,widthAtY,paint(Color.rgb(241,245,249))) } }
+                // Roadside trees pass by to reinforce speed and depth.
+                for(i in 0..5){ val y=((i*.21f+elapsed*.52f)%1.15f)*h; val sideX=w*(if(i%2==0).08f else .92f); val size=w*(.025f+.035f*y/h); c.drawRect(sideX-size*.14f,y,sideX+size*.14f,y+size,paint(Color.rgb(105,68,42))); c.drawCircle(sideX,y,size,paint(Color.rgb(21,101,69))); c.drawCircle(sideX-size*.35f,y+size*.15f,size*.68f,paint(Color.rgb(39,132,79))) }
+                objects.forEach{ drawCar(c,it.x*w,it.y*h,w*(.075f+.05f*it.y),if(it.type==1)purple else red) }
+                val playerSize=w*.145f
+                c.drawOval(w*(lane+.5f)/3f-playerSize*.45f,h*.87f,w*(lane+.5f)/3f+playerSize*.45f,h*.91f,paint(Color.argb(100,0,0,0)))
+                drawCar(c, w*(lane+.5f)/3f,h*.82f,playerSize,if(mode==MotionGame.RIVER)cyan else green)
             }
             MotionGame.SPACE -> {
-                for(i in 0..28) c.drawCircle(w*((i*37%97)/100f),h*((i*53%101)/100f),2f,white)
-                objects.forEach{c.drawCircle(it.x*w,it.y*h,w*.035f,red)}; bullets.forEach{c.drawRoundRect(it.x*w-w*.012f,it.y*h,it.x*w+w*.012f,it.y*h+h*.045f,5f,5f,yellow)}
-                val x=playerX*w; val y=.83f*h; val path=android.graphics.Path().apply{moveTo(x,y-h*.07f);lineTo(x-w*.06f,y+h*.04f);lineTo(x,y+h*.01f);lineTo(x+w*.06f,y+h*.04f);close()}; c.drawPath(path,cyan)
+                // Deep space gradient, nebula haze and parallax stars.
+                p.shader = LinearGradient(0f,0f,w,h,intArrayOf(Color.rgb(5,10,34),Color.rgb(25,31,88),Color.rgb(48,20,87)),null,Shader.TileMode.CLAMP)
+                c.drawRect(0f,0f,w,h,p);p.shader=null
+                c.drawCircle(w*.20f,h*.25f,w*.22f,paint(Color.argb(22,90,80,255)))
+                c.drawCircle(w*.83f,h*.45f,w*.28f,paint(Color.argb(18,255,80,160)))
+                for(i in 0..42){val sx=w*((i*37%97)/100f);val sy=((i*53%101)/101f*h+elapsed*h*(.025f+(i%3)*.012f))%h;val r=if(i%5==0)w*.004f else w*.002f;c.drawCircle(sx,sy,r,paint(if(i%4==0)Color.rgb(255,225,155) else Color.WHITE))}
+                objects.forEach{ enemy ->
+                    val x=enemy.x*w;val y=enemy.y*h;val size=w*(if(enemy.type==1).075f else .055f)
+                    val enemyPath=Path().apply{moveTo(x,y+size*.55f);lineTo(x-size*.65f,y-size*.25f);lineTo(x-size*.32f,y-size*.18f);lineTo(x,y-size*.60f);lineTo(x+size*.32f,y-size*.18f);lineTo(x+size*.65f,y-size*.25f);close()}
+                    c.drawPath(enemyPath,paint(if(enemy.type==1)Color.rgb(255,110,145) else Color.rgb(236,76,91)))
+                    c.drawOval(x-size*.28f,y-size*.17f,x+size*.28f,y+size*.08f,paint(Color.rgb(255,205,130)))
+                    if(enemy.hp>1){c.drawRoundRect(x-size*.45f,y-size*.78f,x+size*.45f,y-size*.64f,4f,4f,paint(Color.rgb(255,210,80)))}
+                }
+                bullets.forEach{c.drawRoundRect(it.x*w-w*.009f,it.y*h,it.x*w+w*.009f,it.y*h+h*.045f,5f,5f,paint(Color.rgb(255,236,124)));c.drawCircle(it.x*w,it.y*h,w*.015f,paint(Color.argb(95,90,235,255)))}
+                val x=playerX*w; val y=.84f*h; val shipSize=w*.12f
+                val weapon=weaponLevel()
+                // Engine glow and a polished player ship.
+                c.drawOval(x-shipSize*.22f,y+shipSize*.18f,x+shipSize*.22f,y+shipSize*.72f,paint(Color.argb(130,40,220,255)))
+                val ship=Path().apply{moveTo(x,y-h*.075f);lineTo(x-shipSize*.52f,y+shipSize*.36f);lineTo(x-shipSize*.20f,y+shipSize*.28f);lineTo(x,y+shipSize*.40f);lineTo(x+shipSize*.20f,y+shipSize*.28f);lineTo(x+shipSize*.52f,y+shipSize*.36f);close()}
+                c.drawPath(ship,paint(Color.rgb(46,210,235)))
+                c.drawPath(Path().apply{moveTo(x,y-h*.045f);lineTo(x-shipSize*.16f,y+shipSize*.16f);lineTo(x+shipSize*.16f,y+shipSize*.16f);close()},paint(Color.rgb(194,245,255)))
+                val cannonXs=when(weapon){1->listOf(0f);2->listOf(-shipSize*.28f,shipSize*.28f);else->listOf(-shipSize*.34f,0f,shipSize*.34f)}
+                cannonXs.forEach{dx->c.drawRoundRect(x+dx-shipSize*.045f,y-shipSize*.10f,x+dx+shipSize*.045f,y+shipSize*.20f,shipSize*.025f,shipSize*.025f,paint(Color.rgb(255,195,70)))}
+                p.color=white.color;p.textSize=w*.032f;p.textAlign=Paint.Align.RIGHT
+                c.drawText("المرحلة ${spaceLevel()}  •  ${when(weapon){1->"مدفع واحد";2->"مدفعان";else->"ثلاثة مدافع"}}",w*.96f,h*.12f,p);p.textAlign=Paint.Align.LEFT
             }
             MotionGame.PACMAN, MotionGame.GHOST, MotionGame.BALL, MotionGame.ESCAPE -> {
                 val cell=minOf(w/gridW,h/gridH); val ox=(w-cell*gridW)/2; val oy=(h-cell*gridH)/2
-                walls.forEach{(x,y)->c.drawRoundRect(ox+x*cell+2,oy+y*cell+2,ox+(x+1)*cell-2,oy+(y+1)*cell-2,7f,7f,cyan)}
-                dots.forEach{(x,y)->c.drawCircle(ox+(x+.5f)*cell,oy+(y+.5f)*cell,cell*.07f,yellow)}
-                ghosts.forEach{(x,y)->c.drawCircle(ox+(x+.5f)*cell,oy+(y+.5f)*cell,cell*.31f,red)}
-                if(mode==MotionGame.ESCAPE){p.color=green.color;c.drawRect(ox+7.5f*cell,oy+10.5f*cell,ox+8f*cell,oy+11f*cell,p)}
+                // Recessed maze cells with subtle inner highlights.
+                walls.forEach{(x,y)->
+                    c.drawRoundRect(ox+x*cell+2,oy+y*cell+2,ox+(x+1)*cell-2,oy+(y+1)*cell-2,cell*.12f,cell*.12f,cyan)
+                    p.color=Color.argb(95,255,255,255);p.style=Paint.Style.STROKE;p.strokeWidth=cell*.025f
+                    c.drawRoundRect(ox+x*cell+cell*.09f,oy+y*cell+cell*.09f,ox+(x+1)*cell-cell*.09f,oy+(y+1)*cell-cell*.09f,cell*.10f,cell*.10f,p);p.style=Paint.Style.FILL
+                }
+                dots.forEach{(x,y)->
+                    val dx=ox+(x+.5f)*cell;val dy=oy+(y+.5f)*cell
+                    p.color=Color.argb(55,255,218,70);c.drawCircle(dx,dy,cell*.15f,p)
+                    c.drawCircle(dx,dy,cell*.065f,yellow);c.drawCircle(dx-cell*.02f,dy-cell*.025f,cell*.022f,white)
+                }
+                ghosts.forEach{(x,y)-> GameGraphics.drawGhost(c,ox+(x+.5f)*cell,oy+(y+.5f)*cell,cell*.30f,elapsed,if(mode==MotionGame.ESCAPE)Color.rgb(188,105,255) else red.color) }
+                if(mode==MotionGame.ESCAPE){
+                    p.color=green.color
+                    c.drawRoundRect(ox+7.42f*cell,oy+10.42f*cell,ox+8f*cell,oy+11f*cell,cell*.10f,cell*.10f,p)
+                    p.color=Color.WHITE;p.style=Paint.Style.STROKE;p.strokeWidth=cell*.04f
+                    c.drawRoundRect(ox+7.48f*cell,oy+10.48f*cell,ox+7.94f*cell,oy+10.94f*cell,cell*.08f,cell*.08f,p);p.style=Paint.Style.FILL
+                }
                 val px=ox+(gx+.5f)*cell;val py=oy+(gy+.5f)*cell
-                if(mode==MotionGame.BALL)c.drawCircle(px,py,cell*.28f,purple) else {c.drawCircle(px,py,cell*.34f,yellow);p.color=Color.BLACK;c.drawCircle(px+cell*.1f,py-cell*.1f,cell*.04f,p)}
+                if(mode==MotionGame.BALL){
+                    c.drawCircle(px,py+cell*.035f,cell*.29f,p.apply{color=Color.argb(80,0,0,0)})
+                    c.drawCircle(px,py,cell*.28f,purple)
+                    c.drawCircle(px-cell*.08f,py-cell*.09f,cell*.075f,white)
+                    p.color=Color.argb(80,255,255,255);p.style=Paint.Style.STROKE;p.strokeWidth=cell*.025f;c.drawCircle(px,py,cell*.24f,p);p.style=Paint.Style.FILL
+                } else if(mode==MotionGame.PACMAN){
+                    val mouth=(.10f+.36f*((kotlin.math.sin(elapsed*12f)+1f)*.5f))*180f
+                    p.color=yellow.color
+                    c.drawArc(RectF(px-cell*.34f,py-cell*.34f,px+cell*.34f,py+cell*.34f),mouth/2f,360f-mouth,true,p)
+                    p.color=Color.rgb(34,39,55);c.drawCircle(px+cell*.09f,py-cell*.16f,cell*.045f,p)
+                } else {
+                    c.drawCircle(px,py,cell*.34f,yellow)
+                    c.drawCircle(px+cell*.10f,py-cell*.10f,cell*.10f,white)
+                    p.color=Color.BLACK;c.drawCircle(px+cell*.12f,py-cell*.08f,cell*.045f,p)
+                }
             }
             MotionGame.JUNGLE -> {
-                c.drawRect(0f,h*.83f,w,h,road); objects.forEach{c.drawRoundRect(it.x*w,h*.74f,it.x*w+w*.14f,h*.84f,8f,8f,red)}
-                c.drawCircle(w*.22f,h*(.75f-jump*.5f),w*.055f,green); c.drawRect(w*.18f,h*(.77f-jump*.5f),w*.26f,h*(.84f-jump*.5f),cyan)
+                c.drawRect(0f,h*.83f,w,h,road);c.drawRect(0f,h*.83f,w,h*.85f,paint(Color.rgb(100,116,139)))
+                objects.forEach{obj->
+                    c.drawOval(obj.x*w,h*.81f,obj.x*w+w*.16f,h*.86f,paint(Color.argb(75,0,0,0)))
+                    c.drawRoundRect(obj.x*w,h*.74f,obj.x*w+w*.14f,h*.84f,8f,8f,red)
+                    c.drawLine(obj.x*w+w*.04f,h*.76f,obj.x*w+w*.04f,h*.82f,paint(Color.argb(90,255,255,255)).apply{strokeWidth=w*.008f})
+                }
+                GameGraphics.drawRunner(c,w*.22f,h*.83f,w*.10f,elapsed,jump*h*.38f)
             }
             MotionGame.BUBBLES -> {
                 c.drawRoundRect(playerX*w-w*.12f,h*.84f,playerX*w+w*.12f,h*.89f,12f,12f,cyan)
@@ -159,9 +277,24 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
             }
         }
         p.color=white.color;p.textSize=w*.045f;p.textAlign=Paint.Align.LEFT;c.drawText("النقاط: $score",w*.04f,h*.07f,p)
-        if(!started||over){p.color=Color.argb(210,0,0,0);c.drawRoundRect(w*.08f,h*.37f,w*.92f,h*.61f,18f,18f,p);p.color=white.color;p.textAlign=Paint.Align.CENTER;p.textSize=w*.052f;c.drawText(if(over)"انتهت اللعبة — $score" else "المس الشاشة لبدء اللعب",w*.5f,h*.48f,p);p.textSize=w*.032f;c.drawText("${mode.hint}",w*.5f,h*.54f,p)}
+        if(!started||over){p.color=Color.argb(210,0,0,0);c.drawRoundRect(w*.08f,h*.37f,w*.92f,h*.63f,18f,18f,p);p.color=white.color;p.textAlign=Paint.Align.CENTER;p.textSize=w*.052f;c.drawText(if(over)"انتهت اللعبة — $score" else "المس الشاشة لبدء اللعب",w*.5f,h*.47f,p);p.textSize=w*.032f;c.drawText("${mode.hint}",w*.5f,h*.53f,p);if(mode==MotionGame.SPACE){p.textSize=w*.031f;c.drawText("10 نقاط: مدفعان  •  25 نقطة: ثلاثة مدافع",w*.5f,h*.585f,p)}}
     }
-    private fun drawCar(c:Canvas,x:Float,y:Float,size:Float,paint:Paint){c.drawRoundRect(x-size*.36f,y-size*.58f,x+size*.36f,y+size*.58f,10f,10f,paint);c.drawRoundRect(x-size*.24f,y-size*.35f,x+size*.24f,y-size*.05f,5f,5f,white);c.drawRect(x-size*.4f,y-size*.38f,x-size*.31f,y-size*.18f,white);c.drawRect(x+size*.31f,y-size*.38f,x+size*.4f,y-size*.18f,white)}
+    private fun drawCar(c:Canvas,x:Float,y:Float,size:Float,body:Paint){
+        // Tires, chassis, windshield, reflections and lights give the cars more depth.
+        val tire=paint(Color.rgb(17,24,39));val rim=paint(Color.rgb(148,163,184))
+        c.drawRoundRect(x-size*.43f,y-size*.40f,x-size*.28f,y-size*.12f,4f,4f,tire)
+        c.drawRoundRect(x+size*.28f,y-size*.40f,x+size*.43f,y-size*.12f,4f,4f,tire)
+        c.drawRoundRect(x-size*.43f,y+size*.18f,x-size*.28f,y+size*.43f,4f,4f,tire)
+        c.drawRoundRect(x+size*.28f,y+size*.18f,x+size*.43f,y+size*.43f,4f,4f,tire)
+        c.drawRoundRect(x-size*.36f,y-size*.60f,x+size*.36f,y+size*.60f,size*.13f,size*.13f,body)
+        c.drawRoundRect(x-size*.24f,y-size*.36f,x+size*.24f,y-size*.04f,size*.07f,size*.07f,paint(Color.rgb(147,220,245)))
+        c.drawRoundRect(x-size*.22f,y+size*.06f,x+size*.22f,y+size*.32f,size*.05f,size*.05f,paint(Color.rgb(30,41,59)))
+        c.drawRoundRect(x-size*.29f,y-size*.52f,x-size*.20f,y-size*.30f,size*.03f,size*.03f,white)
+        c.drawRoundRect(x+size*.20f,y-size*.52f,x+size*.29f,y-size*.30f,size*.03f,size*.03f,white)
+        c.drawRoundRect(x-size*.28f,y+size*.43f,x-size*.12f,y+size*.51f,size*.03f,size*.03f,paint(Color.rgb(255,241,170)))
+        c.drawRoundRect(x+size*.12f,y+size*.43f,x+size*.28f,y+size*.51f,size*.03f,size*.03f,paint(Color.rgb(255,241,170)))
+        c.drawLine(x-size*.20f,y-size*.47f,x-size*.20f,y-size*.34f,paint(Color.argb(90,255,255,255)).apply{strokeWidth=size*.025f})
+    }
     override fun onTouchEvent(e:MotionEvent):Boolean{
         when(e.action){MotionEvent.ACTION_DOWN->{grab();touchX=e.x;touchY=e.y;if(!started||over){startGame();return true}; if(mode==MotionGame.JUNGLE && jump <= 0f){jump=1f}; if(mode==MotionGame.PACMAN||mode==MotionGame.GHOST||mode==MotionGame.BALL||mode==MotionGame.ESCAPE){moveX=0;moveY=0}; return true}
             MotionEvent.ACTION_UP->{val dx=e.x-touchX;val dy=e.y-touchY
@@ -186,7 +319,11 @@ abstract class MotionGameActivity : BaseGameActivity() {
         scoreLabel=label("النقاط: 0",20f);content.addView(scoreLabel,lp(bottom=dp(4)))
         game=MotionArcadeView(this,mode,{s->scoreLabel.text="النقاط: $s"},{s->scoreLabel.text="انتهت اللعبة — النقاط: $s"})
         content.addView(game,lp())
-        content.addView(button("ابدأ / أعد اللعب"){game.startGame()},lp(top=dp(6),bottom=dp(12)))
+        if (mode == MotionGame.PACMAN || mode == MotionGame.GHOST || mode == MotionGame.BALL || mode == MotionGame.ESCAPE) {
+            content.addView(label("أزرار الحركة", 13f, R.color.text_dim, false), lp(top = dp(2), bottom = dp(1)))
+            content.addView(Ui.directionPad(this) { dx, dy -> game.moveDirection(dx, dy) }, lp())
+        }
+        content.addView(button("ابدأ / أعد اللعب"){game.startGame()},lp(top=dp(4),bottom=dp(8)))
     }
     override fun onPause(){if(::game.isInitialized)game.stopLoop();super.onPause()}
 }
@@ -194,9 +331,4 @@ class CarRaceActivity:MotionGameActivity(){override val mode=MotionGame.CAR}
 class PacManActivity:MotionGameActivity(){override val mode=MotionGame.PACMAN}
 class GhostMazeActivity:MotionGameActivity(){override val mode=MotionGame.GHOST}
 class SpaceShooterActivity:MotionGameActivity(){override val mode=MotionGame.SPACE}
-class BikeRaceActivity:MotionGameActivity(){override val mode=MotionGame.BIKE}
-class RiverRunActivity:MotionGameActivity(){override val mode=MotionGame.RIVER}
-class BallMazeActivity:MotionGameActivity(){override val mode=MotionGame.BALL}
-class JungleRunnerActivity:MotionGameActivity(){override val mode=MotionGame.JUNGLE}
-class BubbleCatchActivity:MotionGameActivity(){override val mode=MotionGame.BUBBLES}
 class MazeEscapeActivity:MotionGameActivity(){override val mode=MotionGame.ESCAPE}

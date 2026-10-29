@@ -4,6 +4,10 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.LinearGradient
+import android.graphics.Shader
+import kotlin.math.sin
 import android.os.Bundle
 import android.view.MotionEvent
 import android.widget.TextView
@@ -78,8 +82,11 @@ class HurdleView(
 
         val lastRight = if (hurdles.isEmpty()) -1f else hurdles.last()[0] + hurdles.last()[1]
         if (hurdles.isEmpty() || w - lastRight >= nextGap) {
-            hurdles.add(floatArrayOf(w, w * 0.05f, h * (0.09f + Random.nextFloat() * 0.07f)))
-            nextGap = speed * (0.8f + Random.nextFloat() * 0.55f)
+            // Keep a fair landing window: gap is measured in travel distance, not pixels.
+            val obstacleWidth = w * (0.055f + Random.nextFloat() * 0.018f)
+            val obstacleHeight = h * (0.085f + Random.nextFloat() * 0.045f)
+            hurdles.add(floatArrayOf(w, obstacleWidth, obstacleHeight))
+            nextGap = speed * (1.05f + Random.nextFloat() * 0.48f)
         }
 
         dist += speed * dt
@@ -91,12 +98,12 @@ class HurdleView(
 
         // الاصطدام
         val groundY = h * 0.8f
-        val s = w * 0.09f
+        val s = w * 0.105f
         val rx = w * 0.2f
         val rLeft = rx - s * 0.3f
         val rRight = rx + s * 0.3f
         val rBottom = groundY - offset
-        val rTop = rBottom - s * 0.9f
+        val rTop = rBottom - s * 1.1f
         for (o in hurdles) {
             val oLeft = o[0]
             val oRight = o[0] + o[1]
@@ -113,24 +120,54 @@ class HurdleView(
         val w = width.toFloat()
         val h = height.toFloat()
         val groundY = h * 0.8f
+        // Bright layered sky and distant hills use the same polished arcade language as Flappy.
+        bgP.shader = LinearGradient(0f, 0f, 0f, groundY,
+            intArrayOf(Color.rgb(22, 78, 125), Color.rgb(79, 166, 190), Color.rgb(190, 225, 217)),
+            null, Shader.TileMode.CLAMP)
         canvas.drawRoundRect(0f, 0f, w, h, 24f, 24f, bgP)
-        canvas.drawRect(0f, groundY, w, h, groundP)
+        bgP.shader = null
+        val cloud = paint(Color.argb(115, 255, 255, 255))
+        for (i in 0..3) {
+            val cx = ((i * .31f + .12f - dist / (w * 22f)) % 1.3f) * w
+            val cy = h * (.13f + (i % 2) * .09f)
+            canvas.drawOval(cx-w*.07f,cy-h*.018f,cx+w*.07f,cy+h*.018f,cloud)
+            canvas.drawCircle(cx-w*.025f,cy-h*.01f,h*.018f,cloud)
+            canvas.drawCircle(cx+w*.025f,cy-h*.012f,h*.022f,cloud)
+        }
+        val hill = paint(Color.rgb(66, 143, 116))
+        val hillPath = android.graphics.Path().apply {
+            moveTo(0f, groundY-h*.12f)
+            cubicTo(w*.22f,groundY-h*.29f,w*.34f,groundY-h*.04f,w*.55f,groundY-h*.16f)
+            cubicTo(w*.76f,groundY-h*.31f,w*.86f,groundY-h*.10f,w,groundY-h*.20f)
+            lineTo(w,groundY);lineTo(0f,groundY);close()
+        }
+        canvas.drawPath(hillPath,hill)
+        canvas.drawRect(0f, groundY, w, h, paint(Color.rgb(43, 113, 74)))
+        canvas.drawRect(0f, groundY+h*.035f, w, h, groundP)
 
+        // Animated track dashes make speed and the running surface readable.
+        val dash = paint(Color.rgb(228, 236, 230))
+        val dashOffset = (dist * 1.8f) % (w*.18f)
+        var markX = -dashOffset
+        while (markX < w) {
+            canvas.drawRoundRect(markX, groundY+h*.13f, markX+w*.075f, groundY+h*.145f, h*.01f, h*.01f, dash)
+            markX += w*.18f
+        }
+        canvas.drawRect(0f,groundY,w,groundY+h*.012f,paint(Color.rgb(190,230,215)))
         for (o in hurdles) {
             val top = groundY - o[2]
-            canvas.drawRoundRect(o[0], top, o[0] + o[1], groundY, 6f, 6f, hurdleP)
-            canvas.drawRect(o[0], top + o[2] * 0.25f, o[0] + o[1], top + o[2] * 0.45f, stripeP)
+            GameGraphics.drawHurdle(canvas,o[0],top,o[0]+o[1],groundY,dist)
         }
 
-        val s = w * 0.09f
-        textP.textSize = s * 1.3f
+        val s = w * 0.105f
         val runnerX = w * 0.2f
-        val runnerY = groundY - offset - s * 0.05f
-        // Mirror the runner so the character faces and runs toward the left.
-        canvas.save()
-        canvas.scale(-1f, 1f, runnerX, runnerY - s * 0.45f)
-        canvas.drawText("🏃", runnerX, runnerY, textP)
-        canvas.restore()
+        GameGraphics.drawRunner(canvas,runnerX,groundY,s,dist,offset)
+        // The dotted arc shows the useful jump window relative to the next obstacle.
+        val next = hurdles.firstOrNull { it[0] > runnerX }
+        if (next != null && next[0]-runnerX < w*.43f) {
+            val jumpPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply { color=Color.argb(150,250,204,21); style=Paint.Style.STROKE; strokeWidth=w*.004f; pathEffect=android.graphics.DashPathEffect(floatArrayOf(w*.018f,w*.014f),0f) }
+            canvas.drawArc(RectF(runnerX-s*.45f,groundY-s*2.1f,runnerX+s*2.8f,groundY+s*.1f),205f,130f,false,jumpPaint)
+        }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {

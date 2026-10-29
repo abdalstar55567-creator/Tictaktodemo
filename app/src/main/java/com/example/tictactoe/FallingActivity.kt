@@ -91,10 +91,14 @@ class FallingView(
         val w = width.toFloat()
         val h = height.toFloat()
         canvas.drawRoundRect(0f, 0f, w, h, 24f, 24f, bgP)
+        val speckle=paint(Color.argb(42,255,255,255))
+        for(i in 0..22) canvas.drawCircle(w*((i*41%97)/100f),h*((i*29%89)/100f),w*.0035f,speckle)
+        canvas.drawRoundRect(px-w*.14f,h*.85f,px+w*.14f,h*.91f,12f,12f,paint(Color.argb(55,0,0,0)))
 
         textP.textSize = w * 0.09f
         val list = types()
         for (o in items) {
+            canvas.drawCircle(o[0]-w*.012f,o[1]-w*.012f,w*.027f,paint(Color.argb(45,255,255,255)))
             canvas.drawText(list[o[2].toInt()], o[0], o[1] + w * 0.03f, textP)
         }
 

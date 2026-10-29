@@ -130,7 +130,12 @@ class SnakeView(
         val w = width.toFloat()
         val c = w / n
         canvas.drawRoundRect(0f, 0f, w, w, 24f, 24f, bgPaint)
-        canvas.drawCircle((foodX + 0.5f) * c, (foodY + 0.5f) * c, c * 0.38f, foodPaint)
+        val grid=Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.argb(25,148,163,184);strokeWidth=1f}
+        for(i in 1 until n){canvas.drawLine(i*c,0f,i*c,w,grid);canvas.drawLine(0f,i*c,w,i*c,grid)}
+        val fx=(foodX+.5f)*c;val fy=(foodY+.5f)*c
+        canvas.drawCircle(fx,fy,c*.43f,Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.argb(55,255,100,100)})
+        canvas.drawCircle(fx,fy,c*.34f,foodPaint)
+        canvas.drawCircle(fx-c*.10f,fy-c*.12f,c*.10f,Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.WHITE})
         for (i in body.indices) {
             val p = body[i]
             canvas.drawRoundRect(
@@ -139,6 +144,11 @@ class SnakeView(
                 10f, 10f,
                 if (i == 0) headPaint else bodyPaint
             )
+            canvas.drawRoundRect(p[0]*c+c*.14f,p[1]*c+c*.10f,p[0]*c+c*.78f,p[1]*c+c*.22f,5f,5f,Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.argb(if(i==0)105 else 55,255,255,255)})
+            if(i==0){
+                canvas.drawCircle(p[0]*c+c*.68f,p[1]*c+c*.34f,c*.065f,Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.WHITE})
+                canvas.drawCircle(p[0]*c+c*.70f,p[1]*c+c*.35f,c*.032f,Paint(Paint.ANTI_ALIAS_FLAG).apply{color=Color.rgb(15,23,42)})
+            }
         }
     }
 
@@ -200,26 +210,8 @@ class SnakeActivity : BaseGameActivity() {
             lp(top = dp(8))
         )
 
-        // أسهم التحكم
-        val up = button("⬆", false) { snake.turn(0, -1) }
-        val down = button("⬇", false) { snake.turn(0, 1) }
-        val left = button("⬅", false) { snake.turn(-1, 0) }
-        val right = button("➡", false) { snake.turn(1, 0) }
-
-        val pad = LinearLayout(this)
-        pad.orientation = LinearLayout.VERTICAL
-        pad.gravity = android.view.Gravity.CENTER
-
-        pad.addView(up, LinearLayout.LayoutParams(dp(80), dp(52)))
-
-        val mid = row()
-        mid.addView(left, LinearLayout.LayoutParams(dp(80), dp(52)))
-        mid.addView(View(this), LinearLayout.LayoutParams(dp(60), dp(52)))
-        mid.addView(right, LinearLayout.LayoutParams(dp(80), dp(52)))
-        pad.addView(mid)
-
-        pad.addView(down, LinearLayout.LayoutParams(dp(80), dp(52)))
-        content.addView(pad, lp(top = dp(8)))
+        // لوحة اتجاهات موحدة بنفس ألوان وأحجام بقية الألعاب.
+        content.addView(Ui.directionPad(this) { dx, dy -> snake.turn(dx, dy) }, lp(top = dp(4)))
 
         content.addView(button("ابدأ") { snake.start() }, lp(height = dp(50), top = dp(12)))
     }

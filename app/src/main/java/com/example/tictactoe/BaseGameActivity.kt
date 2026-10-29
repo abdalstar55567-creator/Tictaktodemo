@@ -138,4 +138,15 @@ abstract class BaseGameActivity : AppCompatActivity() {
         r.gravity = Gravity.CENTER
         return r
     }
+
+    protected fun row(topMarginDp: Int): LinearLayout {
+        val r = row()
+        val p = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+        p.topMargin = dp(topMarginDp)
+        r.layoutParams = p
+        return r
+    }
 }

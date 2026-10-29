@@ -63,5 +63,16 @@ object Games {
         GameInfo("🌊", "عبور النهر", RiverCrossingActivity::class.java),
         GameInfo("❤️", "لغز الصورة المخفية", NonogramActivity::class.java),
         GameInfo("🚰", "وصل الأنابيب", PipeConnectActivity::class.java),
+        GameInfo("🎯", "صائد الهدف", TargetTapActivity::class.java),
+        GameInfo("🏓", "تنس الطاولة", PongSoloActivity::class.java),
+        GameInfo("🏀", "تصويب السلة", BasketShotActivity::class.java),
+        GameInfo("💎", "جامع الجواهر", GemCollectorActivity::class.java),
+        GameInfo("🫧", "فرقع الفقاعات", BubblePopActivity::class.java),
+        GameInfo("☄️", "تفادي النيازك", MeteorDodgeActivity::class.java),
+        GameInfo("🏃", "عدّاء الحواجز", JumpRunnerActivity::class.java),
+        GameInfo("⛳", "الغولف المصغّر", MiniGolfActivity::class.java),
+        GameInfo("🧠", "ذاكرة الأزواج", MemoryPairsPlusActivity::class.java),
+        GameInfo("🔤", "سباق الكلمات", WordSprintActivity::class.java),
+        GameInfo("⚽", "ارتداد الكرة", BallBounceActivity::class.java),
     )
 }

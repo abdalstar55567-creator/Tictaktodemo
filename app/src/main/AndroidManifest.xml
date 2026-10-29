@@ -76,6 +76,17 @@
         <activity android:name=".RiverCrossingActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".NonogramActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".PipeConnectActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".TargetTapActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".PongSoloActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".BasketShotActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".GemCollectorActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".BubblePopActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MeteorDodgeActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".JumpRunnerActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MiniGolfActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MemoryPairsPlusActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".WordSprintActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".BallBounceActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

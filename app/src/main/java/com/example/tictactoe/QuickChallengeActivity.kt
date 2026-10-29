@@ -18,6 +18,8 @@ abstract class QuickChallengeActivity : BaseGameActivity() {
     private var score = 0
     private var correctAnswer = ""
     private var locked = false
+    // Prevent the same prompt from appearing twice during one ten-question session.
+    private val usedPrompts = mutableSetOf<String>()
     private lateinit var status: TextView
     private lateinit var question: TextView
     private lateinit var feedback: TextView
@@ -53,6 +55,7 @@ abstract class QuickChallengeActivity : BaseGameActivity() {
         round = 0
         score = 0
         locked = false
+        usedPrompts.clear()
         replay.visibility = View.GONE
         choices.forEach { it.visibility = View.VISIBLE }
         nextChallenge()
@@ -69,7 +72,19 @@ abstract class QuickChallengeActivity : BaseGameActivity() {
             Feedback.win(this)
             return
         }
-        val c = makeChallenge()
+        // Random generation can produce duplicates; draw again until this session gets a new prompt.
+        var c = makeChallenge()
+        if (mode == "capital" || mode == "animal") {
+            // يوجد 15 سؤالاً مختلفاً على الأقل، لذلك نعيد السحب حتى نحصل على سؤال لم يظهر بعد.
+            while (c.prompt in usedPrompts) c = makeChallenge()
+        } else {
+            var attempts = 0
+            while (c.prompt in usedPrompts && attempts < 100) {
+                c = makeChallenge()
+                attempts++
+            }
+        }
+        usedPrompts.add(c.prompt)
         correctAnswer = c.answer
         val shuffled = c.options.shuffled()
         question.text = c.prompt
@@ -121,21 +136,41 @@ abstract class QuickChallengeActivity : BaseGameActivity() {
             }
             "capital" -> {
                 val data = listOf(
-                    Triple("السودان", "الخرطوم", listOf("القاهرة", "أديس أبابا", "الخرطوم")),
-                    Triple("مصر", "القاهرة", listOf("القاهرة", "الرباط", "دمشق")),
-                    Triple("السعودية", "الرياض", listOf("جدة", "الرياض", "مكة")),
-                    Triple("المغرب", "الرباط", listOf("تونس", "الجزائر", "الرباط")),
-                    Triple("اليابان", "طوكيو", listOf("سيول", "طوكيو", "بكين")),
-                    Triple("تركيا", "أنقرة", listOf("إسطنبول", "أنقرة", "إزمير"))
+                    Triple("السودان", "الخرطوم", listOf("الخرطوم", "القاهرة", "أديس أبابا", "نواكشوط")),
+                    Triple("مصر", "القاهرة", listOf("القاهرة", "الرباط", "دمشق", "تونس")),
+                    Triple("السعودية", "الرياض", listOf("الرياض", "جدة", "مكة", "مسقط")),
+                    Triple("المغرب", "الرباط", listOf("الرباط", "تونس", "الجزائر", "طرابلس")),
+                    Triple("اليابان", "طوكيو", listOf("طوكيو", "سيول", "بكين", "بانكوك")),
+                    Triple("تركيا", "أنقرة", listOf("أنقرة", "إسطنبول", "إزمير", "صوفيا")),
+                    Triple("الأردن", "عمّان", listOf("عمّان", "بيروت", "دمشق", "القدس")),
+                    Triple("العراق", "بغداد", listOf("بغداد", "البصرة", "أربيل", "الكويت")),
+                    Triple("قطر", "الدوحة", listOf("الدوحة", "المنامة", "أبوظبي", "مسقط")),
+                    Triple("الجزائر", "الجزائر", listOf("الجزائر", "وهران", "الرباط", "تونس")),
+                    Triple("ألمانيا", "برلين", listOf("برلين", "ميونخ", "فيينا", "زيورخ")),
+                    Triple("كندا", "أوتاوا", listOf("أوتاوا", "تورونتو", "فانكوفر", "مونتريال")),
+                    Triple("أستراليا", "كانبرا", listOf("كانبرا", "سيدني", "ملبورن", "بيرث")),
+                    Triple("إيطاليا", "روما", listOf("روما", "ميلانو", "البندقية", "أثينا")),
+                    Triple("كينيا", "نيروبي", listOf("نيروبي", "مومباسا", "كمبالا", "أديس أبابا"))
                 ).random()
-                Challenge("🌍 ما عاصمة ${data.first}؟", (data.third + listOf("لندن")).distinct().take(4), data.second)
+                Challenge("🌍 ما عاصمة ${data.first}؟", data.third, data.second)
             }
             "animal" -> {
                 val data = listOf(
                     Triple("مواء", "القط", listOf("القط", "الكلب", "الحصان", "البقرة")),
                     Triple("نهيق", "الحمار", listOf("الأسد", "الحمار", "الخروف", "القرد")),
                     Triple("صهيل", "الحصان", listOf("الحصان", "القط", "الدجاجة", "الذئب")),
-                    Triple("خوار", "البقرة", listOf("البقرة", "الثعلب", "الحمامة", "السمكة"))
+                    Triple("خوار", "البقرة", listOf("البقرة", "الثعلب", "الحمامة", "السمكة")),
+                    Triple("نباح", "الكلب", listOf("الكلب", "القط", "البطة", "الحصان")),
+                    Triple("زئير", "الأسد", listOf("الأسد", "النمر", "الفيل", "الذئب")),
+                    Triple("نقيق", "الضفدع", listOf("الضفدع", "الأفعى", "السلحفاة", "السمكة")),
+                    Triple("ثغاء", "الخروف", listOf("الخروف", "البقرة", "الحمار", "الدجاجة")),
+                    Triple("صياح", "الديك", listOf("الديك", "البومة", "الحمامة", "العصفور")),
+                    Triple("قوقأة", "الدجاجة", listOf("الدجاجة", "الديك", "البطة", "الحمامة")),
+                    Triple("فحيح", "الأفعى", listOf("الأفعى", "الضفدع", "القرد", "الحصان")),
+                    Triple("خرخرة", "القط", listOf("القط", "الكلب", "الأسد", "البقرة")),
+                    Triple("نعيق", "الغراب", listOf("الغراب", "الحمامة", "البطة", "العندليب")),
+                    Triple("زقزقة", "العصفور", listOf("العصفور", "الغراب", "البومة", "الديك")),
+                    Triple("هديل", "الحمامة", listOf("الحمامة", "العصفور", "البطة", "الغراب"))
                 ).random()
                 Challenge("🐾 أي حيوان يصدر صوت «${data.first}»؟", data.third, data.second)
             }

@@ -68,10 +68,12 @@ class StopBarView(context: Context) : GameLoopView(context) {
         val w = width.toFloat()
         val h = height.toFloat()
         canvas.drawRoundRect(0f, 0f, w, h, 20f, 20f, bgP)
-        canvas.drawRect(
-            (zoneCenter - zoneWidth / 2f) * w, 0f,
-            (zoneCenter + zoneWidth / 2f) * w, h, zoneP
-        )
+        val left=(zoneCenter-zoneWidth/2f)*w;val right=(zoneCenter+zoneWidth/2f)*w
+        canvas.drawRect(left,0f,right,h,zoneP)
+        canvas.drawRect(left,0f,left+w*.008f,h,paint(Color.argb(80,255,255,255)))
+        canvas.drawRect(right-w*.008f,0f,right,h,paint(Color.argb(70,0,0,0)))
+        for(i in 1..8) canvas.drawLine(left,h*i/9f,right,h*i/9f,paint(Color.argb(35,255,255,255)))
+        canvas.drawRoundRect(pos*w-w*.013f,0f,pos*w+w*.013f,h,8f,8f,paint(Color.argb(65,255,255,255)))
         canvas.drawRoundRect(pos * w - 6f, 0f, pos * w + 6f, h, 6f, 6f, markP)
     }
 }

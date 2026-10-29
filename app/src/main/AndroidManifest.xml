@@ -87,6 +87,16 @@
         <activity android:name=".MemoryPairsPlusActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".WordSprintActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".BallBounceActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".EmojiCountActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".ColorWordActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".BiggerNumberActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MathCheckActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MakeTenActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MissingLetterActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".AntonymsActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MemoryEmojiActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".TreasureHuntActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".LuckyWheelActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

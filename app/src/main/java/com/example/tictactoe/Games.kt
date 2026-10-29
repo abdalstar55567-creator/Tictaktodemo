@@ -74,5 +74,15 @@ object Games {
         GameInfo("🧠", "ذاكرة الأزواج", MemoryPairsPlusActivity::class.java),
         GameInfo("🔤", "سباق الكلمات", WordSprintActivity::class.java),
         GameInfo("⚽", "ارتداد الكرة", BallBounceActivity::class.java),
+        GameInfo("🔢", "عدّ الرموز", EmojiCountActivity::class.java),
+        GameInfo("🌈", "لون الكلمة", ColorWordActivity::class.java),
+        GameInfo("⚖️", "أيّهما أكبر؟", BiggerNumberActivity::class.java),
+        GameInfo("✅", "المعادلة الصحيحة", MathCheckActivity::class.java),
+        GameInfo("🔟", "كمّل للعشرة", MakeTenActivity::class.java),
+        GameInfo("🔤", "الحرف الناقص", MissingLetterActivity::class.java),
+        GameInfo("↔️", "عكس الكلمة", AntonymsActivity::class.java),
+        GameInfo("👀", "تذكّر الرمز", MemoryEmojiActivity::class.java),
+        GameInfo("💰", "صيد الكنز", TreasureHuntActivity::class.java),
+        GameInfo("🎡", "عجلة الحظ", LuckyWheelActivity::class.java),
     )
 }

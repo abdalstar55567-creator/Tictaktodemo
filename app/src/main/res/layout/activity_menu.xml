@@ -68,6 +68,16 @@
             android:orientation="vertical" />
 
         <Button
+            android:id="@+id/menuAbout"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_button"
+            android:text="ℹ️  عن التطبيق والخصوصية"
+            android:textColor="@color/text_main"
+            android:textSize="15sp" />
+
+        <Button
             android:id="@+id/menuSound"
             android:layout_width="match_parent"
             android:layout_height="50dp"

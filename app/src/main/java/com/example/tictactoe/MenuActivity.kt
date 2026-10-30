@@ -8,6 +8,8 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AlertDialog
+import androidx.activity.OnBackPressedCallback
 
 class MenuActivity : AppCompatActivity() {
 
@@ -36,6 +38,21 @@ class MenuActivity : AppCompatActivity() {
             updateSoundButton()
         }
 
+        findViewById<Button>(R.id.menuAbout).setOnClickListener {
+            startActivity(Intent(this, AboutActivity::class.java))
+        }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                AlertDialog.Builder(this@MenuActivity)
+                    .setTitle("الخروج من التطبيق")
+                    .setMessage("هل أنت متأكد أنك تريد الخروج من التطبيق؟")
+                    .setPositiveButton("نعم، خروج") { _, _ -> finish() }
+                    .setNegativeButton("البقاء", null)
+                    .show()
+            }
+        })
+
         updateSoundButton()
         buildGamesMenu()
     }
@@ -52,6 +69,8 @@ class MenuActivity : AppCompatActivity() {
     private fun buildGamesMenu() {
 
         gamesList.removeAllViews()
+
+        val favorites = FavoritesManager.all(this, Games.all)
 
         // أولاً: أكثر ثلاث ألعاب زيارة
         val topThree = GameUsageManager.mostPlayed(
@@ -72,7 +91,7 @@ class MenuActivity : AppCompatActivity() {
         // ثالثاً: بقية الألعاب
         // الألعاب التي سبق لعبها ترتب حسب آخر زيارة
         // الألعاب الجديدة تحتفظ بترتيبها الأصلي
-        val excluded = (topThree + recentGames)
+        val excluded = (favorites + topThree + recentGames)
             .map { it.cls }
             .toSet()
 
@@ -91,6 +110,12 @@ class MenuActivity : AppCompatActivity() {
                     ).lastPlayed
                 }
             )
+
+        // المفضلة تظهر أولاً
+        if (favorites.isNotEmpty()) {
+            addSectionTitle("♥ ألعابي المفضلة")
+            addGameGrid(favorites)
+        }
 
         // عرض القسم الأول
         if (topThree.isNotEmpty()) {

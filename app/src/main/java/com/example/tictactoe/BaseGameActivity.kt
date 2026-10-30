@@ -10,7 +10,6 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
-import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
@@ -67,7 +66,21 @@ abstract class BaseGameActivity : AppCompatActivity() {
             screenTitle ?: gameTitle
 
         bar.findViewById<View>(R.id.backButton)
-            .setOnClickListener { confirmExit() }
+            .setOnClickListener { finish() }
+
+        val favoriteButton = bar.findViewById<Button>(R.id.favoriteButton)
+        fun refreshFavorite() {
+            val selected = FavoritesManager.contains(this, javaClass.name)
+            favoriteButton.text = if (selected) "♥" else "♡"
+            favoriteButton.setTextColor(color(if (selected) R.color.x_color else R.color.text_main))
+            favoriteButton.contentDescription = if (selected) "إزالة من المفضلة" else "إضافة إلى المفضلة"
+        }
+        refreshFavorite()
+        favoriteButton.setOnClickListener {
+            FavoritesManager.toggle(this, javaClass.name)
+            refreshFavorite()
+            Feedback.tap(this)
+        }
 
         installBackHandler()
     }
@@ -81,21 +94,10 @@ abstract class BaseGameActivity : AppCompatActivity() {
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    confirmExit()
+                    finish()
                 }
             }
         )
-    }
-
-    protected fun confirmExit() {
-        AlertDialog.Builder(this)
-            .setTitle("مغادرة اللعبة")
-            .setMessage("هل أنت متأكد أنك تريد المغادرة؟")
-            .setPositiveButton("نعم، غادر") { _, _ ->
-                finish()
-            }
-            .setNegativeButton("لا، ابقَ", null)
-            .show()
     }
 
     // أدوات مساعدة لبناء الواجهات

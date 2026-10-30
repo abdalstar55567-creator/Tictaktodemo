@@ -539,7 +539,8 @@ class MeteorShootingGame : AppCompatActivity() {
             paint.textSize = 26f
             paint.color = Color.WHITE
             val sub = if (won)
-                "دمرت $meteorsDestroyed نيزك، و$alivecountHouse منازل نجت"
+               
+"دمرت $meteorsDestroyed نيزك، و${houses.count { it.alive }} منازل نجت"
             else
                 "تم تدمير ${TOTAL_HOUSES - houses.count { it.alive }} منزل"
             canvas.drawText(sub, width / 2f, height / 2f + 55f, paint)

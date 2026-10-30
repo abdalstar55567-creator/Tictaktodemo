@@ -32,6 +32,7 @@ class SprintRunActivity : BaseGameActivity() {
     private var finished = false
     private var startedAt = 0L
     private var lastFrame = 0L
+    private var pausedAt = 0L
     private var progress = 0f
     private var remaining = GAME_TIME
     private var tapRate = 0f
@@ -81,13 +82,23 @@ class SprintRunActivity : BaseGameActivity() {
 
     override fun onPause() {
         handler.removeCallbacks(frame)
+        if (running) pausedAt = SystemClock.elapsedRealtime()
         super.onPause()
     }
 
     override fun onResume() {
         super.onResume()
         if (running) {
-            lastFrame = SystemClock.elapsedRealtime()
+            val now = SystemClock.elapsedRealtime()
+            // لا يُحتسب وقت التوقف المؤقت (مثلاً الخروج من التطبيق) ضمن وقت السباق.
+            if (pausedAt > 0L) {
+                val pausedFor = now - pausedAt
+                startedAt += pausedFor
+                taps.clear()
+                pausedAt = 0L
+            }
+            lastFrame = now
+            handler.removeCallbacks(frame)
             handler.post(frame)
         }
     }
@@ -118,6 +129,7 @@ class SprintRunActivity : BaseGameActivity() {
         handler.removeCallbacks(frame)
         running = false
         finished = false
+        pausedAt = 0L
         progress = 0f
         remaining = GAME_TIME
         tapRate = 0f

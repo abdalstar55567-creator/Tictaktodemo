@@ -14,6 +14,7 @@ object Games {
         GameInfo("✊✋✌️", "حجر ورقة مقص", RpsActivity::class.java),
         GameInfo("➕", "تحدي الحساب", MathActivity::class.java),
         GameInfo("🐹", "اضرب الخلد", WhackActivity::class.java),
+        GameInfo("🏃", "الركض السريع", SprintRunActivity::class.java),
         GameInfo("👆", "سرعة الضغط", TapSpeedActivity::class.java),
         GameInfo("⚡", "سرعة رد الفعل", ReactionActivity::class.java),
         GameInfo("🧩", "لغز الأرقام", PuzzleActivity::class.java),

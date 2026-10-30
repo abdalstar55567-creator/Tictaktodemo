@@ -133,6 +133,7 @@ class MeteorShootingGame : AppCompatActivity() {
         private var spawnTimer = 0f
 
         // --- كيانات اللعبة ---
+        /*
         private class House(var x: Float, var y: Float, var width: Float, var height: Float) {
             var alive = true
         }
@@ -142,7 +143,32 @@ class MeteorShootingGame : AppCompatActivity() {
             var radius: Float, var rot: Float, var rotSpeed: Float
         )
         private class Missile(var x: Float, var y: Float, var vx: Float, var vy: Float)
+*/
+    private class House(
+    var x: Float,
+    var y: Float,
+    var width: Float,
+    var height: Float
+) {
+    var alive = true
+}
 
+private class Meteor(
+    var x: Float,
+    var y: Float,
+    var vx: Float,
+    var vy: Float,
+    var radius: Float,
+    var rot: Float,
+    var rotSpeed: Float
+)
+
+private class Missile(
+    var x: Float,
+    var y: Float,
+    var vx: Float,
+    var vy: Float
+)
         private val houses = mutableListOf<House>()
         private val meteors = mutableListOf<Meteor>()
         private val missiles = mutableListOf<Missile>()

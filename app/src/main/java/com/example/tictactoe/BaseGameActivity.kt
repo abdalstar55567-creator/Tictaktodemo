@@ -14,20 +14,10 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
-/**
- * أساس كل الألعاب.
- *
- * أي شاشة لعبة تُمرَّر إلى setContentView (سواء ملف تصميم أو View مبنية بالكود)
- * تُلَفّ تلقائياً بشريط علوي فيه زر "رجوع" وعنوان اللعبة، وعند الضغط على
- * الزر (أو زر الرجوع في الهاتف) تظهر رسالة: هل أنت متأكد أنك تريد المغادرة؟
- *
- * العنوان: إما override لـ gameTitle أو الاستدعاء initScreen("العنوان").
- */
 abstract class BaseGameActivity : AppCompatActivity() {
 
     open val gameTitle: String get() = ""
 
-    /** حاوية المحتوى للألعاب التي تستخدم initScreen. */
     protected lateinit var content: LinearLayout
 
     private var screenTitle: String? = null
@@ -36,13 +26,12 @@ abstract class BaseGameActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // نسجل الزيارة مرة واحدة فقط، ولا نكررها عند تدوير الشاشة أو إعادة إنشاء النشاط.
+        // تسجيل فتح اللعبة مرة واحدة عند بدء النشاط
         if (savedInstanceState == null) {
             GameUsageManager.recordGameOpened(this, javaClass.name)
         }
     }
 
-    /** للألعاب التي تبني واجهتها بالكود على حاوية جاهزة اسمها content. */
     protected fun initScreen(title: String) {
         screenTitle = title
         val col = Ui.column(this)
@@ -62,42 +51,64 @@ abstract class BaseGameActivity : AppCompatActivity() {
         val bar = layoutInflater.inflate(R.layout.view_topbar, root, false)
         bar.setPadding(dp(16), dp(12), dp(16), dp(4))
         root.addView(bar)
-        root.addView(view, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f))
+
+        root.addView(
+            view,
+            LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                0,
+                1f
+            )
+        )
 
         super.setContentView(root)
 
-        bar.findViewById<TextView>(R.id.topTitle).text = screenTitle ?: gameTitle
-        bar.findViewById<View>(R.id.backButton).setOnClickListener { confirmExit() }
+        bar.findViewById<TextView>(R.id.topTitle).text =
+            screenTitle ?: gameTitle
+
+        bar.findViewById<View>(R.id.backButton)
+            .setOnClickListener { confirmExit() }
+
         installBackHandler()
     }
 
     private fun installBackHandler() {
         if (backInstalled) return
+
         backInstalled = true
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                confirmExit()
+
+        onBackPressedDispatcher.addCallback(
+            this,
+            object : OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    confirmExit()
+                }
             }
-        })
+        )
     }
 
     protected fun confirmExit() {
         AlertDialog.Builder(this)
             .setTitle("مغادرة اللعبة")
             .setMessage("هل أنت متأكد أنك تريد المغادرة؟")
-            .setPositiveButton("نعم، غادر") { _, _ -> finish() }
+            .setPositiveButton("نعم، غادر") { _, _ ->
+                finish()
+            }
             .setNegativeButton("لا، ابقَ", null)
             .show()
     }
 
-    // ---------- أدوات مساعدة لبناء الواجهات بالكود ----------
+    // أدوات مساعدة لبناء الواجهات
 
     protected fun dp(value: Int): Int =
         TypedValue.applyDimension(
-            TypedValue.COMPLEX_UNIT_DIP, value.toFloat(), resources.displayMetrics
+            TypedValue.COMPLEX_UNIT_DIP,
+            value.toFloat(),
+            resources.displayMetrics
         ).toInt()
 
-    protected fun color(res: Int): Int = ContextCompat.getColor(this, res)
+    protected fun color(res: Int): Int =
+        ContextCompat.getColor(this, res)
 
     protected fun label(
         text: String,
@@ -110,17 +121,29 @@ abstract class BaseGameActivity : AppCompatActivity() {
         tv.setTextSize(TypedValue.COMPLEX_UNIT_SP, sp)
         tv.setTextColor(color(colorRes))
         tv.gravity = Gravity.CENTER
-        if (bold) tv.setTypeface(tv.typeface, Typeface.BOLD)
+
+        if (bold) {
+            tv.setTypeface(tv.typeface, Typeface.BOLD)
+        }
+
         return tv
     }
 
-    protected fun button(text: String, primary: Boolean = true, onClick: () -> Unit): Button {
+    protected fun button(
+        text: String,
+        primary: Boolean = true,
+        onClick: () -> Unit
+    ): Button {
         val b = Button(this)
         b.text = text
         b.isAllCaps = false
         b.setTextColor(color(R.color.text_main))
-        b.setBackgroundResource(if (primary) R.drawable.bg_button else R.drawable.bg_button_dim)
+        b.setBackgroundResource(
+            if (primary) R.drawable.bg_button
+            else R.drawable.bg_button_dim
+        )
         b.setOnClickListener { onClick() }
+
         return b
     }
 
@@ -151,12 +174,15 @@ abstract class BaseGameActivity : AppCompatActivity() {
 
     protected fun row(topMarginDp: Int): LinearLayout {
         val r = row()
+
         val p = LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
+
         p.topMargin = dp(topMarginDp)
         r.layoutParams = p
+
         return r
     }
 }

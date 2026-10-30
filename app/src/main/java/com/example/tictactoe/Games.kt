@@ -103,5 +103,7 @@ object Games {
         GameInfo("⚽", "تسديد كرة القدم", FixedGoalFootballActivity::class.java),
         GameInfo("🦆", "صيد البط", DuckHuntActivity::class.java),
         GameInfo("🔢", "السودوكو", SudokuActivity::class.java),
+        GameInfo ("🙃🙂", "جد الاختلاف",  RealisticDifferencesActivity::class.java), 
+
     )
 }

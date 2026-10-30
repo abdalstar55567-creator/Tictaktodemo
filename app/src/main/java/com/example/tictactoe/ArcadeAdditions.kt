@@ -266,14 +266,32 @@ private class MeteorDefenseView(
         p.shader = LinearGradient(0f, 0f, w, h, intArrayOf(Color.rgb(4, 10, 34), Color.rgb(20, 25, 72), Color.rgb(49, 23, 78)), null, Shader.TileMode.CLAMP)
         c.drawRect(0f, 0f, w, h, p); p.shader = null
         stars.forEachIndexed { i, s -> p.color = if (i % 5 == 0) Color.rgb(255, 224, 150) else Color.rgb(190, 211, 255); c.drawCircle(s.first * w, s.second * h, if (i % 5 == 0) 2.4f else 1.3f, p) }
-        // distant planet and horizon
-        p.color = Color.argb(35, 130, 110, 255); c.drawCircle(w * .78f, h * .20f, w * .14f, p)
-        p.color = Color.rgb(30, 73, 83); c.drawRect(0f, h * .91f, w, h, p)
+        // Deep-space moon, layered mountain silhouettes and atmospheric horizon.
+        p.shader = LinearGradient(w * .68f, h * .08f, w * .88f, h * .34f,
+            intArrayOf(Color.rgb(226, 224, 210), Color.rgb(112, 126, 151), Color.rgb(54, 67, 103)), null, Shader.TileMode.CLAMP)
+        c.drawCircle(w * .79f, h * .20f, w * .105f, p); p.shader = null
+        p.color = Color.argb(42, 40, 47, 67)
+        c.drawCircle(w * .75f, h * .17f, w * .018f, p); c.drawCircle(w * .83f, h * .23f, w * .026f, p)
+        val ridge = Path().apply { moveTo(0f, h * .82f); lineTo(w * .12f, h * .70f); lineTo(w * .25f, h * .80f); lineTo(w * .42f, h * .67f); lineTo(w * .57f, h * .79f); lineTo(w * .74f, h * .69f); lineTo(w, h * .81f); lineTo(w, h); lineTo(0f, h); close() }
+        p.color = Color.rgb(22, 35, 62); c.drawPath(ridge, p)
+        val farRidge = Path().apply { moveTo(0f, h * .86f); lineTo(w * .18f, h * .77f); lineTo(w * .34f, h * .85f); lineTo(w * .60f, h * .76f); lineTo(w * .82f, h * .84f); lineTo(w, h * .78f); lineTo(w, h); lineTo(0f, h); close() }
+        p.color = Color.rgb(35, 47, 66); c.drawPath(farRidge, p)
+        p.shader = LinearGradient(0f, h * .88f, 0f, h, intArrayOf(Color.rgb(73, 77, 79), Color.rgb(22, 31, 43)), null, Shader.TileMode.CLAMP)
+        c.drawRect(0f, h * .88f, w, h, p); p.shader = null
+        p.color = Color.rgb(111, 105, 94)
+        for (i in 0..24) { val x = (i * 47 % 101) / 101f * w; val y = h * (.90f + (i % 5) * .018f); c.drawOval(x, y, x + w * .018f, y + h * .006f, p) }
         // Three defended homes with visible health indicators.
         houses.forEach { house ->
             val x = house.x * w; val base = h * .91f; val bw = w * .13f; val bh = h * .10f
-            p.color = if (house.hp > 0) Color.rgb(63, 165, 190) else Color.rgb(65, 67, 82)
-            c.drawRoundRect(x - bw / 2, base - bh, x + bw / 2, base, 7f, 7f, p)
+            p.shader = LinearGradient(x - bw / 2, base - bh, x + bw / 2, base,
+                if (house.hp > 0) intArrayOf(Color.rgb(159, 177, 181), Color.rgb(72, 104, 119), Color.rgb(37, 58, 75)) else intArrayOf(Color.DKGRAY, Color.GRAY), null, Shader.TileMode.CLAMP)
+            c.drawRoundRect(x - bw / 2, base - bh, x + bw / 2, base, 5f, 5f, p); p.shader = null
+            // lit windows and masonry seams
+            for (row in 0..1) for (col in 0..1) {
+                p.color = if (house.hp > 0) Color.rgb(255, 205, 111) else Color.rgb(55, 59, 65)
+                val wx = x - bw * .30f + col * bw * .40f; val wy = base - bh * (.76f - row * .32f)
+                c.drawRoundRect(wx, wy, wx + bw * .18f, wy + bh * .16f, 2f, 2f, p)
+            }
             p.color = if (house.hp > 0) Color.rgb(255, 191, 105) else Color.rgb(95, 75, 78)
             val roof = Path().apply { moveTo(x - bw * .62f, base - bh); lineTo(x, base - bh * 1.65f); lineTo(x + bw * .62f, base - bh); close() }
             c.drawPath(roof, p)
@@ -281,13 +299,22 @@ private class MeteorDefenseView(
             p.color = Color.rgb(255, 220, 95); c.drawRoundRect(x - bw * .42f, base - bh * 1.88f, x + bw * .42f, base - bh * 1.72f, 4f, 4f, p)
             for (i in 0 until 3) { p.color = if (i < house.hp) Color.rgb(83, 235, 155) else Color.rgb(80, 83, 103); c.drawCircle(x - w * .035f + i * w * .035f, base - bh * 2.03f, w * .009f, p) }
         }
-        // incoming fiery rocks
+        // Incoming asteroids: incandescent atmospheric tail, irregular rocky body and craters.
         meteors.forEach { m ->
             val x = m.x * w; val y = m.y * h; val r = m.radius * w
-            p.color = Color.argb(70, 255, 100, 45); c.drawCircle(x, y, r * 2.1f, p)
-            p.shader = LinearGradient(x - r, y - r, x + r, y + r, intArrayOf(Color.rgb(255, 220, 145), Color.rgb(230, 91, 49), Color.rgb(93, 43, 52)), null, Shader.TileMode.CLAMP)
-            c.drawCircle(x, y, r, p); p.shader = null
-            p.color = Color.rgb(255, 235, 177); c.drawCircle(x - r * .22f, y - r * .22f, r * .20f, p)
+            val tail = Path().apply { moveTo(x - m.vx * w * .34f, y - m.vy * h * .34f); lineTo(x - r * .42f, y - r * .38f); lineTo(x + r * .42f, y + r * .38f); close() }
+            p.shader = LinearGradient(x, y - m.vy * h * .34f, x, y, intArrayOf(Color.TRANSPARENT, Color.argb(95, 255, 91, 35), Color.argb(210, 255, 192, 91)), null, Shader.TileMode.CLAMP)
+            c.drawPath(tail, p); p.shader = null
+            p.color = Color.argb(45, 255, 88, 32); c.drawCircle(x, y, r * 2.25f, p)
+            val rock = Path().apply {
+                val factors = floatArrayOf(1f, .82f, 1.08f, .88f, 1.02f, .78f, 1.05f, .91f)
+                for (i in factors.indices) { val a = (Math.PI * 2.0 * i / factors.size).toFloat(); val px = x + kotlin.math.cos(a) * r * factors[i]; val py = y + kotlin.math.sin(a) * r * factors[i]; if (i == 0) moveTo(px, py) else lineTo(px, py) }; close()
+            }
+            p.shader = LinearGradient(x - r, y - r, x + r, y + r, intArrayOf(Color.rgb(255, 202, 119), Color.rgb(183, 91, 57), Color.rgb(65, 48, 53)), null, Shader.TileMode.CLAMP)
+            c.drawPath(rock, p); p.shader = null
+            p.color = Color.argb(125, 55, 36, 39); c.drawCircle(x + r * .27f, y + r * .18f, r * .22f, p)
+            p.color = Color.argb(105, 255, 185, 117); c.drawCircle(x - r * .30f, y - r * .27f, r * .13f, p)
+            if (m.hp > 1) { p.color = Color.WHITE; p.style = Paint.Style.STROKE; p.strokeWidth = 2f; c.drawCircle(x, y, r * 1.22f, p); p.style = Paint.Style.FILL }
         }
         missiles.forEach { m ->
             p.color = Color.argb(100, 90, 220, 255); c.drawCircle(m.x * w, m.y * h, w * .018f, p)
@@ -297,11 +324,16 @@ private class MeteorDefenseView(
             val radius = w * (.025f + b.age * .23f); p.color = Color.argb((190 * (1f - b.age / .58f)).toInt().coerceIn(0, 190), 255, 177, 75); c.drawCircle(b.x * w, b.y * h, radius, p)
             p.color = Color.argb(100, 255, 245, 190); c.drawCircle(b.x * w, b.y * h, radius * .48f, p)
         }
-        // player launcher
+        // Detailed mobile interceptor turret with armored base, barrel and glowing core.
         val cx = cannonX * w; val cy = h * .90f
-        p.color = Color.argb(100, 60, 210, 255); c.drawCircle(cx, cy, w * .065f, p)
-        p.color = Color.rgb(67, 188, 220); c.drawRoundRect(cx - w * .045f, cy - h * .055f, cx + w * .045f, cy + h * .02f, 9f, 9f, p)
-        p.color = Color.rgb(225, 244, 255); c.drawRoundRect(cx - w * .012f, cy - h * .105f, cx + w * .012f, cy - h * .025f, 6f, 6f, p)
+        p.color = Color.argb(45, 0, 0, 0); c.drawOval(cx - w * .075f, cy - h * .015f, cx + w * .075f, cy + h * .025f, p)
+        p.shader = LinearGradient(cx - w * .05f, cy - h * .05f, cx + w * .05f, cy + h * .04f, intArrayOf(Color.rgb(180, 205, 214), Color.rgb(49, 83, 107), Color.rgb(18, 34, 54)), null, Shader.TileMode.CLAMP)
+        c.drawRoundRect(cx - w * .055f, cy - h * .045f, cx + w * .055f, cy + h * .025f, 10f, 10f, p); p.shader = null
+        p.color = Color.rgb(122, 157, 172); c.drawRoundRect(cx - w * .014f, cy - h * .12f, cx + w * .014f, cy - h * .025f, 5f, 5f, p)
+        p.color = Color.rgb(24, 41, 58); c.drawRoundRect(cx - w * .009f, cy - h * .115f, cx + w * .009f, cy - h * .03f, 3f, 3f, p)
+        p.color = Color.rgb(255, 196, 93); c.drawCircle(cx, cy - h * .035f, w * .012f, p)
+        p.color = Color.rgb(90, 223, 255); c.drawCircle(cx, cy - h * .035f, w * .005f, p)
+        p.color = Color.rgb(170, 198, 211); c.drawCircle(cx - w * .04f, cy - h * .012f, w * .006f, p); c.drawCircle(cx + w * .04f, cy - h * .012f, w * .006f, p)
         p.color = white; p.textSize = w * .035f; p.textAlign = Paint.Align.CENTER; p.typeface = android.graphics.Typeface.DEFAULT_BOLD
         c.drawText("المس مكان النيزك لإطلاق صاروخ", w / 2f, h * .075f, p)
         if (!started || ended) {

@@ -115,6 +115,7 @@
         <activity android:name=".PicturePuzzleActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".FixedGoalFootballActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".DuckHuntActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".SudokuActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

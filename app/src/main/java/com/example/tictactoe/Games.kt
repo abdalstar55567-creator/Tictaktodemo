@@ -8,6 +8,8 @@ data class GameInfo(val emoji: String, val title: String, val cls: Class<*>)
  */
 object Games {
     val all: List<GameInfo> = listOf(
+        GameInfo("🎆", "صيد النيازك", MeteorShootingGame::class.java
+)
         GameInfo("❌⭕", "إكس أو", MainActivity::class.java),
         GameInfo("🧠", "لعبة الذاكرة", MemoryActivity::class.java),
         GameInfo("🔢", "تخمين الرقم", GuessNumberActivity::class.java),

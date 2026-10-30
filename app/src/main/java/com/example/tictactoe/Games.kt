@@ -8,7 +8,6 @@ data class GameInfo(val emoji: String, val title: String, val cls: Class<*>)
  */
 object Games {
     val all: List<GameInfo> = listOf(
-        GameInfo("🎆", "صيد النيازك", MeteorShootingGame::class.java), 
         GameInfo("❌⭕", "إكس أو", MainActivity::class.java),
         GameInfo("🧠", "لعبة الذاكرة", MemoryActivity::class.java),
         GameInfo("🔢", "تخمين الرقم", GuessNumberActivity::class.java),
@@ -52,6 +51,9 @@ object Games {
         GameInfo("🔤", "خلط الكلمات", WordScrambleActivity::class.java),
         GameInfo("⚡", "الحساب السريع", QuickMathActivity::class.java),
         GameInfo("🏎️", "سباق السيارات", CarRaceActivity::class.java),
+        GameInfo("🚴", "سباق الدراجات", BikeRaceActivity::class.java),
+        GameInfo("🧱", "تيترس", TetrisActivity::class.java),
+        GameInfo("☄️", "صيد النيازك", MeteorShootingActivity::class.java),
         GameInfo("🟡", "متاهة آكل النقاط", PacManActivity::class.java),
         GameInfo("👻", "مطاردة الأشباح", GhostMazeActivity::class.java),
         GameInfo("🚀", "مدافع الفضاء", SpaceShooterActivity::class.java),

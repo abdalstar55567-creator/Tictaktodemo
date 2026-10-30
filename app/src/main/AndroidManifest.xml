@@ -64,6 +64,9 @@
         <activity android:name=".QuickMathActivity" android:exported="false" android:screenOrientation="portrait" />
 
         <activity android:name=".CarRaceActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".BikeRaceActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".TetrisActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".MeteorShootingActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".PacManActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".GhostMazeActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SpaceShooterActivity" android:exported="false" android:screenOrientation="portrait" />
@@ -107,7 +110,7 @@
         <activity android:name=".WeatherQuizActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".ArcheryActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".NumberLadderActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MeteorShootingGame" android:exported="false" android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>

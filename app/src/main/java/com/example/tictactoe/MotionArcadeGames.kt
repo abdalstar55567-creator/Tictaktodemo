@@ -190,10 +190,15 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
                 for(i in 0..7){ val y=((i*.22f+scroll)%1.15f)*h; val widthAtY=w*(.012f+.025f*y/h); for(laneMark in 1..2){ val x=w*(.25f+laneMark*.166f)+ (y/h-.5f)*w*.166f; c.drawRoundRect(x-widthAtY,y,x+widthAtY,y+h*(.035f+.025f*y/h),widthAtY,widthAtY,paint(Color.rgb(241,245,249))) } }
                 // Roadside trees pass by to reinforce speed and depth.
                 for(i in 0..5){ val y=((i*.21f+elapsed*.52f)%1.15f)*h; val sideX=w*(if(i%2==0).08f else .92f); val size=w*(.025f+.035f*y/h); c.drawRect(sideX-size*.14f,y,sideX+size*.14f,y+size,paint(Color.rgb(105,68,42))); c.drawCircle(sideX,y,size,paint(Color.rgb(21,101,69))); c.drawCircle(sideX-size*.35f,y+size*.15f,size*.68f,paint(Color.rgb(39,132,79))) }
-                objects.forEach{ drawCar(c,it.x*w,it.y*h,w*(.075f+.05f*it.y),if(it.type==1)purple else red) }
+                objects.forEach{ obstacle ->
+                    val ox = obstacle.x*w; val oy = obstacle.y*h; val size = w*(.075f+.05f*obstacle.y)
+                    if (mode == MotionGame.BIKE) drawBike(c, ox, oy, size, if(obstacle.type==1)purple else red)
+                    else drawCar(c, ox, oy, size, if(obstacle.type==1)purple else red)
+                }
                 val playerSize=w*.145f
                 c.drawOval(w*(lane+.5f)/3f-playerSize*.45f,h*.87f,w*(lane+.5f)/3f+playerSize*.45f,h*.91f,paint(Color.argb(100,0,0,0)))
-                drawCar(c, w*(lane+.5f)/3f,h*.82f,playerSize,if(mode==MotionGame.RIVER)cyan else green)
+                if (mode == MotionGame.BIKE) drawBike(c, w*(lane+.5f)/3f,h*.82f,playerSize,green)
+                else drawCar(c, w*(lane+.5f)/3f,h*.82f,playerSize,green)
             }
             MotionGame.SPACE -> {
                 // Deep space gradient, nebula haze and parallax stars.
@@ -278,6 +283,22 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
         }
         p.color=white.color;p.textSize=w*.045f;p.textAlign=Paint.Align.LEFT;c.drawText("النقاط: $score",w*.04f,h*.07f,p)
         if(!started||over){p.color=Color.argb(210,0,0,0);c.drawRoundRect(w*.08f,h*.37f,w*.92f,h*.63f,18f,18f,p);p.color=white.color;p.textAlign=Paint.Align.CENTER;p.textSize=w*.052f;c.drawText(if(over)"انتهت اللعبة — $score" else "المس الشاشة لبدء اللعب",w*.5f,h*.47f,p);p.textSize=w*.032f;c.drawText("${mode.hint}",w*.5f,h*.53f,p);if(mode==MotionGame.SPACE){p.textSize=w*.031f;c.drawText("10 نقاط: مدفعان  •  25 نقطة: ثلاثة مدافع",w*.5f,h*.585f,p)}}
+    }
+    private fun drawBike(c: Canvas, x: Float, y: Float, size: Float, body: Paint) {
+        val wheel = paint(Color.rgb(20, 27, 42))
+        val rim = paint(Color.rgb(195, 211, 224))
+        val left = x - size * .34f; val right = x + size * .34f; val cy = y + size * .22f
+        c.drawCircle(left, cy, size * .22f, wheel); c.drawCircle(right, cy, size * .22f, wheel)
+        c.drawCircle(left, cy, size * .12f, rim); c.drawCircle(right, cy, size * .12f, rim)
+        val frame = paint(body.color).apply { style = Paint.Style.STROKE; strokeWidth = size * .075f; strokeCap = Paint.Cap.ROUND }
+        c.drawLine(left, cy, x - size * .05f, y - size * .12f, frame)
+        c.drawLine(x - size * .05f, y - size * .12f, right, cy, frame)
+        c.drawLine(left, cy, right, cy, frame)
+        c.drawLine(x - size * .05f, y - size * .12f, x + size * .10f, y - size * .28f, frame)
+        c.drawLine(x + size * .10f, y - size * .28f, right, cy - size * .04f, frame)
+        c.drawCircle(x, y - size * .34f, size * .13f, paint(Color.rgb(255, 207, 151)))
+        c.drawRoundRect(x - size * .16f, y - size * .23f, x + size * .17f, y + size * .02f, size * .10f, size * .10f, body)
+        c.drawLine(x - size * .02f, y - size * .12f, left, cy, frame)
     }
     private fun drawCar(c:Canvas,x:Float,y:Float,size:Float,body:Paint){
         // Tires, chassis, windshield, reflections and lights give the cars more depth.

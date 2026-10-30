@@ -1,6 +1,7 @@
 package com.example.tictactoe
 
 import android.graphics.Typeface
+import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -31,6 +32,15 @@ abstract class BaseGameActivity : AppCompatActivity() {
 
     private var screenTitle: String? = null
     private var backInstalled = false
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        // نسجل الزيارة مرة واحدة فقط، ولا نكررها عند تدوير الشاشة أو إعادة إنشاء النشاط.
+        if (savedInstanceState == null) {
+            GameUsageManager.recordGameOpened(this, javaClass.name)
+        }
+    }
 
     /** للألعاب التي تبني واجهتها بالكود على حاوية جاهزة اسمها content. */
     protected fun initScreen(title: String) {

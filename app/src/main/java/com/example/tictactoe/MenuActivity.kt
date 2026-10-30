@@ -67,71 +67,73 @@ class MenuActivity : AppCompatActivity() {
     }
 
     private fun buildGamesMenu() {
-
         gamesList.removeAllViews()
 
         val favorites = FavoritesManager.all(this, Games.all)
-
-        // أولاً: أكثر ثلاث ألعاب زيارة
-        val topThree = GameUsageManager.mostPlayed(
-            this,
-            Games.all,
-            3
-        )
-
-        // ثانياً: آخر خمس ألعاب لعبها المستخدم
-        // مع استبعاد الألعاب الموجودة في القسم الأول
-        val recentGames = GameUsageManager
-            .recentlyPlayed(this, Games.all, 100)
-            .filter { recent ->
-                topThree.none { it.cls == recent.cls }
-            }
-            .take(5)
-
-        // ثالثاً: بقية الألعاب
-        // الألعاب التي سبق لعبها ترتب حسب آخر زيارة
-        // الألعاب الجديدة تحتفظ بترتيبها الأصلي
-        val excluded = (favorites + topThree + recentGames)
-            .map { it.cls }
-            .toSet()
-
-        val remainingGames = Games.all
-            .filter { it.cls !in excluded }
-            .sortedWith(
-                compareByDescending<GameInfo> {
-                    GameUsageManager.usage(
-                        this,
-                        it.cls.name
-                    ).lastPlayed > 0
-                }.thenByDescending {
-                    GameUsageManager.usage(
-                        this,
-                        it.cls.name
-                    ).lastPlayed
-                }
-            )
-
-        // المفضلة تظهر أولاً
         if (favorites.isNotEmpty()) {
             addSectionTitle("♥ ألعابي المفضلة")
             addGameGrid(favorites)
         }
 
-        // عرض القسم الأول
-        if (topThree.isNotEmpty()) {
-            addSectionTitle("🏆 الألعاب الأكثر زيارة")
-            addGameGrid(topThree)
+        // تصنيف ثابت وواضح حتى تظهر الألعاب في مجموعات مفهومة من أول تشغيل.
+        val favoriteClasses = favorites.map { it.cls }.toSet()
+        val gamesForCategories = Games.all.filter { it.cls !in favoriteClasses }
+
+        val categoryRules = linkedMapOf(
+            "🏃 ألعاب الحركة والمغامرة" to setOf(
+                "SprintRunActivity", "HurdleRunActivity", "FlappyActivity", "FrogHopActivity",
+                "CatchActivity", "DodgeActivity", "CarRaceActivity", "BikeRaceActivity",
+                "MeteorShootingActivity", "GhostMazeActivity", "SpaceShooterActivity", "MazeEscapeActivity",
+                "TargetTapActivity", "GemCollectorActivity", "MeteorDodgeActivity", "JumpRunnerActivity",
+                "BallBounceActivity", "TreasureHuntActivity", "CrosswalkActivity", "BeeFlowerActivity",
+                "ArcheryActivity", "FixedGoalFootballActivity", "DuckHuntActivity", "CatapultActivity",
+                "MagnetActivity", "PongSoloActivity", "BasketShotActivity", "MiniGolfActivity",
+                "BrickActivity", "WhackActivity", "StopBarActivity", "BubblePopActivity"
+            ),
+            "🧩 ألعاب العقل والألغاز" to setOf(
+                "PuzzleActivity", "MinesweeperActivity", "LightsOutActivity", "TowerActivity",
+                "Game2048Activity", "SokobanActivity", "HanoiActivity", "MastermindActivity",
+                "NimStrategyActivity", "PegSolitaireActivity", "RiverCrossingActivity", "NonogramActivity",
+                "PipeConnectActivity", "SudokuActivity", "PicturePuzzleActivity", "TetrisActivity"
+            ),
+            "🧠 ألعاب الذكاء والذاكرة والتركيز" to setOf(
+                "MemoryActivity", "NumberMemoryActivity", "SequenceActivity", "OddOneActivity",
+                "NumberOrderActivity", "ColorMatchActivity", "ColorQuizActivity", "SimonActivity",
+                "MemoryPairsPlusActivity", "EmojiCountActivity", "ColorWordActivity", "BiggerNumberActivity",
+                "MathCheckActivity", "MakeTenActivity", "MissingLetterActivity", "AntonymsActivity",
+                "MemoryEmojiActivity", "CoinCountActivity", "ClockReadActivity", "OddWordActivity", "RealisticDifferencesActivity",
+                "BalanceScaleActivity", "NumberLadderActivity", "LetterColoringActivity", "EyesightChallengeActivity"
+            ),
+            "❓ الأسئلة والمعرفة" to setOf(
+                "TriviaActivity", "CapitalQuizActivity", "AnimalQuizActivity", "TrueFalseActivity",
+                "HigherLowerActivity", "WeatherQuizActivity", "GuessNumberActivity", "HangmanActivity",
+                "WordScrambleActivity", "ScrambleActivity", "QuickMathActivity", "MathActivity"
+            ),
+            "⚡ ألعاب السرعة والتحدي" to setOf(
+                "TapSpeedActivity", "ReactionActivity", "WordSprintActivity", "QuickChallengeActivity",
+                "OddEvenActivity", "ColorWordActivity"
+            ),
+            "🎲 الألعاب الكلاسيكية والاجتماعية" to setOf(
+                "MainActivity", "RpsActivity", "DiceActivity", "DiceDuelActivity", "CoinFlipActivity",
+                "SnakeActivity", "Connect4Activity", "PacManActivity", "LuckyWheelActivity",
+                "LuckBoxActivity", "FallingActivity", "CheckersActivity"
+            )
+        )
+
+        val assigned = mutableSetOf<Class<*>>()
+        categoryRules.forEach { (title, classNames) ->
+            val group = gamesForCategories.filter { it.cls.simpleName in classNames && assigned.add(it.cls) }
+            if (group.isNotEmpty()) {
+                addSectionTitle("$title  (${group.size})")
+                addGameGrid(group)
+            }
         }
 
-        // عرض القسم الثاني
-        if (recentGames.isNotEmpty()) {
-            addSectionTitle("🕹️ آخر الألعاب التي لعبتها")
-            addGameGrid(recentGames)
+        val uncategorized = gamesForCategories.filter { it.cls !in assigned }
+        if (uncategorized.isNotEmpty()) {
+            addSectionTitle("🎮 ألعاب متنوعة  (${uncategorized.size})")
+            addGameGrid(uncategorized)
         }
-
-        // عرض جميع الألعاب المتبقية
-        addSectionTitle("🎮 جميع الألعاب")
-        addGameGrid(remainingGames)
     }
 
     private fun addSectionTitle(title: String) {

@@ -120,6 +120,7 @@
         <activity android:name=".DuckHuntActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SudokuActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".FrogHopActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".CheckersActivity" android:exported="false" android:screenOrientation="portrait" />
             </application>
 
 </manifest>

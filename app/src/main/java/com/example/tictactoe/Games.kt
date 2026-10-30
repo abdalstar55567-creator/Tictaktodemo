@@ -106,6 +106,7 @@ object Games {
         GameInfo("🔢", "السودوكو", SudokuActivity::class.java),
         GameInfo("🏰", "منجنيق الكرات", CatapultActivity::class.java),
         GameInfo ("🙃🙂", "جد الاختلاف",  RealisticDifferencesActivity::class.java), 
+        GameInfo("🐸", "نطّة الضفدع", FrogHopActivity::class.java),
 
     )
 }

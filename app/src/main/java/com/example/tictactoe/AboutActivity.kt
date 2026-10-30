@@ -34,9 +34,8 @@ class AboutActivity : BaseGameActivity() {
             val intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:abdal.star55569@gmail.com"))
             startActivity(Intent.createChooser(intent, "إرسال بريد إلكتروني"))
         }, lp(bottom = 8))
-        content.addView(button("قناة يوتيوب: كنز الفرص", false) {
-            openLink("https://www.youtube.com/@kanzalfuras")
-        }, lp(bottom = 8))
+       
+    
         content.addView(label("الإصدار: 1.0", 13f, R.color.text_dim, false), lp(top = 16))
     }
 

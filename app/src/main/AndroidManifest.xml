@@ -27,6 +27,7 @@
         <activity android:name=".MathActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".WhackActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SprintRunActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".CatapultActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".TapSpeedActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".ReactionActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".PuzzleActivity" android:exported="false" android:screenOrientation="portrait" />

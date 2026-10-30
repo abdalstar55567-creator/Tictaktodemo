@@ -66,7 +66,7 @@ fun RealisticDifferencesScreen() {
         ) {
             // استبدل R.drawable.sample_image باسم صورتك الموجودة في مجلد drawable
             Image(
-                painter = painterResource(id = R.drawable.ic_launcher_foreground), // ضع صورتك هنا مثلاً R.drawable.game_photo
+                painter = painterResource(id = R.drawable.sample_image ), // ضع صورتك هنا مثلاً R.drawable.game_photo
                 contentDescription = "صورة اللعبة الواقعية",
                 modifier = Modifier.fillMaxSize(),
                 contentScale = ContentScale.Crop

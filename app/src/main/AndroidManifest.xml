@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+I<?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -116,7 +116,7 @@
         <activity android:name=".FixedGoalFootballActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".DuckHuntActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SudokuActivity" android:exported="false" android:screenOrientation="portrait" />
-
+        <activity android:name=".TapSpeedActivity" android:exported="false" android:screenOrientation="portrait" /> 
     </application>
 
 </manifest>

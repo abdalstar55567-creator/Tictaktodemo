@@ -71,13 +71,27 @@ class MenuActivity : AppCompatActivity() {
 
         val favorites = FavoritesManager.all(this, Games.all)
         if (favorites.isNotEmpty()) {
-            addSectionTitle("♥ ألعابي المفضلة")
+            addSectionTitle("♥ ألعابي المفضلة  (${favorites.size})")
             addGameGrid(favorites)
         }
 
-        // تصنيف ثابت وواضح حتى تظهر الألعاب في مجموعات مفهومة من أول تشغيل.
-        val favoriteClasses = favorites.map { it.cls }.toSet()
-        val gamesForCategories = Games.all.filter { it.cls !in favoriteClasses }
+        // أقسام ديناميكية تعتمد على سجل الاستخدام المحلي على الجهاز.
+        // قد تظهر اللعبة في هذه الأقسام وفي تصنيفها الأصلي لتسهيل الوصول إليها.
+        val mostPlayed = GameUsageManager.mostPlayed(this, Games.all, 6)
+        if (mostPlayed.isNotEmpty()) {
+            addSectionTitle("🔥 الأكثر زيارة  (${mostPlayed.size})")
+            addGameGrid(mostPlayed)
+        }
+
+        val recentlyPlayed = GameUsageManager.recentlyPlayed(this, Games.all, 6)
+        if (recentlyPlayed.isNotEmpty()) {
+            addSectionTitle("🕘 آخر الألعاب لعباً  (${recentlyPlayed.size})")
+            addGameGrid(recentlyPlayed)
+        }
+
+        // تصنيفات ثابتة وواضحة، وتبقى جميع الألعاب داخل تصنيفاتها حتى
+        // إن ظهرت أيضاً في المفضلة أو الأكثر زيارة أو آخر الألعاب لعباً.
+        val gamesForCategories = Games.all
 
         val categoryRules = linkedMapOf(
             "🏃 ألعاب الحركة والمغامرة" to setOf(

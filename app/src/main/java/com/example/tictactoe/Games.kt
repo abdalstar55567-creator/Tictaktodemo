@@ -97,5 +97,10 @@ object Games {
         GameInfo("🌦️", "تحدّي الطقس", WeatherQuizActivity::class.java),
         GameInfo("🏹", "الرماية", ArcheryActivity::class.java),
         GameInfo("🪜", "سلّم الأرقام", NumberLadderActivity::class.java),
+        GameInfo("🎨", "تلوين الحروف", LetterColoringActivity::class.java),
+        GameInfo("👀", "قوة النظر", EyesightChallengeActivity::class.java),
+        GameInfo("🧩", "تجميع الصور", PicturePuzzleActivity::class.java),
+        GameInfo("⚽", "تسديد كرة القدم", FixedGoalFootballActivity::class.java),
+        GameInfo("🦆", "صيد البط", DuckHuntActivity::class.java),
     )
 }

@@ -110,6 +110,11 @@
         <activity android:name=".WeatherQuizActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".ArcheryActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".NumberLadderActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".LetterColoringActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".EyesightChallengeActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".PicturePuzzleActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".FixedGoalFootballActivity" android:exported="false" android:screenOrientation="portrait" />
+        <activity android:name=".DuckHuntActivity" android:exported="false" android:screenOrientation="portrait" />
 
     </application>
 

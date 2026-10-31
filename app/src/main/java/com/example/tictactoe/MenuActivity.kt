@@ -14,6 +14,7 @@ import androidx.activity.OnBackPressedCallback
 class MenuActivity : AppCompatActivity() {
 
     private lateinit var soundButton: Button
+    private lateinit var musicButton: Button
 
     private lateinit var gamesList: LinearLayout
 
@@ -27,6 +28,12 @@ class MenuActivity : AppCompatActivity() {
             "${Games.all.size} لعبة متاحة الآن"
 
         soundButton = findViewById(R.id.menuSound)
+        musicButton = findViewById(R.id.menuMusic)
+        musicButton.setOnClickListener {
+            GameMusic.setEnabled(this, !GameMusic.enabled(this))
+            Feedback.tap(this)
+            updateMusicButton()
+        }
 
         soundButton.setOnClickListener {
             Feedback.setEnabled(
@@ -54,6 +61,8 @@ class MenuActivity : AppCompatActivity() {
         })
 
         updateSoundButton()
+        updateMusicButton()
+        GameMusic.stopNow()
         buildGamesMenu()
     }
 
@@ -63,6 +72,8 @@ class MenuActivity : AppCompatActivity() {
         // تحديث الترتيب عند العودة من اللعبة
         if (::gamesList.isInitialized) {
             buildGamesMenu()
+            updateMusicButton()
+            updateSoundButton()
         }
     }
 
@@ -249,6 +260,10 @@ class MenuActivity : AppCompatActivity() {
                 )
             }
         }
+    }
+
+    private fun updateMusicButton() {
+        musicButton.text = if (GameMusic.enabled(this)) "🎵  موسيقى الألعاب: تشغيل" else "🎵  موسيقى الألعاب: إيقاف"
     }
 
     private fun updateSoundButton() {

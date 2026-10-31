@@ -22,6 +22,16 @@ abstract class BaseGameActivity : AppCompatActivity() {
     private var screenTitle: String? = null
     private var backInstalled = false
 
+    override fun onResume() {
+        super.onResume()
+        GameMusic.playFor(this, javaClass.simpleName)
+    }
+
+    override fun onStop() {
+        super.onStop()
+        GameMusic.stopWhenBackgrounded()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 

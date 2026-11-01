@@ -17,7 +17,7 @@ object Games {
         GameInfo("🏃", "الركض السريع", SprintRunActivity::class.java),
         GameInfo("👆", "سرعة الضغط", TapSpeedActivity::class.java),
         GameInfo("⚡", "سرعة رد الفعل", ReactionActivity::class.java),
-        GameInfo("🧩", "لغز الأرقام", PuzzleActivity::class.java),
+        GameInfo("🔢", "تحدي الأرقام والصور", PuzzleActivity::class.java),
         GameInfo("🎲", "رمي النرد", DiceActivity::class.java),
         GameInfo("🎨", "تحدي الألوان", ColorMatchActivity::class.java),
         GameInfo("🐍", "الثعبان", SnakeActivity::class.java),

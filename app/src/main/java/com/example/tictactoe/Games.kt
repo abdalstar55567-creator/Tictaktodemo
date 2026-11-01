@@ -108,6 +108,7 @@ object Games {
         GameInfo ("🙃🙂", "جد الاختلاف",  RealisticDifferencesActivity::class.java), 
         GameInfo("🐸", "نطّة الضفدع", FrogHopActivity::class.java),
         GameInfo("♟️", "الداما", CheckersActivity::class.java),
+        GameInfo("🌀", "تشابك الألوان (Tangler)", com.andrzejn.tangler.AndroidLauncher::class.java),
 
     )
 }

@@ -3,6 +3,11 @@ plugins {
     id 'org.jetbrains.kotlin.android'
 }
 
+// Native libraries required by the embedded LibGDX game (Tangler).
+configurations {
+    gdxNatives
+}
+
 android {
     namespace 'com.example.tictactoe'
     compileSdk 34
@@ -13,6 +18,12 @@ android {
         targetSdk 34
         versionCode 1
         versionName "1.0"
+    }
+
+    sourceSets {
+        main {
+            jniLibs.srcDir(layout.buildDirectory.dir('generated/gdxJniLibs'))
+        }
     }
 
     buildFeatures {
@@ -40,6 +51,25 @@ android {
 }
 
 dependencies {
+    // Tangler game engine and rendering dependencies.
+    implementation 'com.badlogicgames.gdx:gdx:1.13.1'
+    implementation 'com.badlogicgames.gdx:gdx-backend-android:1.13.1'
+    implementation 'com.badlogicgames.gdx:gdx-freetype:1.13.1'
+    implementation 'io.github.libktx:ktx-app:1.12.1-rc1'
+    implementation 'io.github.libktx:ktx-assets:1.12.1-rc1'
+    implementation 'space.earlygrey:shapedrawer:2.6.0'
+    implementation 'org.mini2Dx:universal-tween-engine:6.3.3'
+
+    // Bundle native LibGDX libraries for the common Android ABIs.
+    gdxNatives 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-armeabi-v7a'
+    gdxNatives 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-arm64-v8a'
+    gdxNatives 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-x86'
+    gdxNatives 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-x86_64'
+    gdxNatives 'com.badlogicgames.gdx:gdx-freetype-platform:1.13.1:natives-armeabi-v7a'
+    gdxNatives 'com.badlogicgames.gdx:gdx-freetype-platform:1.13.1:natives-arm64-v8a'
+    gdxNatives 'com.badlogicgames.gdx:gdx-freetype-platform:1.13.1:natives-x86'
+    gdxNatives 'com.badlogicgames.gdx:gdx-freetype-platform:1.13.1:natives-x86_64'
+
     implementation 'androidx.appcompat:appcompat:1.6.1'
 
     // Jetpack Compose
@@ -50,4 +80,43 @@ dependencies {
     implementation 'androidx.compose.material3:material3:1.2.1'
 
     debugImplementation 'androidx.compose.ui:ui-tooling:1.6.2'
+}
+
+
+// Extract each LibGDX native artifact into the ABI directory encoded in
+// its Maven classifier (the .so files inside these jars are at the jar root).
+tasks.register('extractGdxNatives') {
+    def nativeOutputDir = layout.buildDirectory.dir('generated/gdxJniLibs')
+    outputs.dir(nativeOutputDir)
+
+    doLast {
+        def outputDir = nativeOutputDir.get().asFile
+        delete(outputDir)
+        outputDir.mkdirs()
+
+        def abiByClassifier = [
+            'natives-armeabi-v7a.jar': 'armeabi-v7a',
+            'natives-arm64-v8a.jar': 'arm64-v8a',
+            'natives-x86.jar': 'x86',
+            'natives-x86_64.jar': 'x86_64'
+        ]
+
+        configurations.gdxNatives.files.each { nativeJar ->
+            def abi = abiByClassifier.find { suffix, value -> nativeJar.name.endsWith(suffix) }?.value
+            if (abi != null) {
+                copy {
+                    from(zipTree(nativeJar))
+                    include '**/*.so'
+                    eachFile { details -> details.path = details.name }
+                    includeEmptyDirs = false
+                    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+                    into(new File(outputDir, abi))
+                }
+            }
+        }
+    }
+}
+
+tasks.named('preBuild').configure {
+    dependsOn tasks.named('extractGdxNatives')
 }

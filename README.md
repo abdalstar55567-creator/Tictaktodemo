@@ -155,3 +155,8 @@
 - أضيفت ستة مقاطع موسيقية أصلية قصيرة تتكرر تلقائياً حسب تصنيف اللعبة.
 - يمكن تشغيل موسيقى الألعاب أو إيقافها من زر مستقل في القائمة الرئيسية، ويحفظ التطبيق اختيار المستخدم.
 - مستوى الموسيقى منخفض حتى لا يطغى على أصوات ومؤثرات اللعب.
+
+
+## Third-party games
+
+The game **تشابك الألوان (Tangler)** is based on Tangler by Andrzej Novosiolov and is distributed under CC BY 4.0. Attribution, integration changes, and the full license text are provided in `THIRD_PARTY_NOTICES.md` and `TANGLER-LICENSE.txt`.

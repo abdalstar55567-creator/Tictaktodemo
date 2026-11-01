@@ -119,7 +119,7 @@ class MenuActivity : AppCompatActivity() {
                 "PuzzleActivity", "MinesweeperActivity", "LightsOutActivity", "TowerActivity",
                 "Game2048Activity", "SokobanActivity", "HanoiActivity", "MastermindActivity",
                 "NimStrategyActivity", "PegSolitaireActivity", "RiverCrossingActivity", "NonogramActivity",
-                "PipeConnectActivity", "SudokuActivity", "PicturePuzzleActivity", "TetrisActivity"
+                "PipeConnectActivity", "SudokuActivity", "PicturePuzzleActivity", "TetrisActivity", "AndroidLauncher"
             ),
             "🧠 ألعاب الذكاء والذاكرة والتركيز" to setOf(
                 "MemoryActivity", "NumberMemoryActivity", "SequenceActivity", "OddOneActivity",

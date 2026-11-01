@@ -112,7 +112,7 @@ class MenuActivity : AppCompatActivity() {
                 "TargetTapActivity", "GemCollectorActivity", "MeteorDodgeActivity", "JumpRunnerActivity",
                 "BallBounceActivity", "TreasureHuntActivity", "CrosswalkActivity", "BeeFlowerActivity",
                 "ArcheryActivity", "FixedGoalFootballActivity", "DuckHuntActivity", "CatapultActivity",
-                "MagnetActivity", "PongSoloActivity", "BasketShotActivity", "MiniGolfActivity",
+                "NeonGameActivity", "MagnetActivity", "PongSoloActivity", "BasketShotActivity", "MiniGolfActivity",
                 "BrickActivity", "WhackActivity", "StopBarActivity", "BubblePopActivity"
             ),
             "🧩 ألعاب العقل والألغاز" to setOf(

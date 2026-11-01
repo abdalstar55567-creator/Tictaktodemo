@@ -16,3 +16,20 @@ Changes made for this integration:
 - Adapted the Android dependency configuration and native-library packaging to the host application.
 
 The original work remains attributed to Andrzej Novosiolov. The full original license text is preserved in `TANGLER-LICENSE.txt`.
+
+## Neon
+
+- Original title: **Neon** (STG / shoot-'em-up)
+- Original author: **Mario Dujić**
+- Source repository: https://github.com/mariodujic/Neon
+- Original project license: **MIT** (full text in `NEON-LICENSE.txt`, Copyright (c) 2022 Mario Dujić)
+
+Presented inside 100+ as **"نيون: معارك الفضاء"**.
+
+Changes made for this integration:
+- Moved the sources into the host app (package `com.zero.neon` kept) and resources prefixed with `neon_`.
+- Replaced Navigation Compose with a simple splash/game switch (`NeonApp.kt`) and added a pause menu (resume/restart/exit).
+- Removed the online ExoPlayer music (streamed from the internet); the host app's offline music is used instead. No network permission is needed.
+- Replaced the GIF explosion (Coil) with a drawn animation and removed Accompanist.
+- Added a game-over dialog when the ship's HP reaches zero (the original never ended).
+- Translated all player-facing text to Arabic.

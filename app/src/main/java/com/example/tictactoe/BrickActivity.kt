@@ -14,14 +14,17 @@ class BrickView(
     context: Context,
     private val onScore: (Int) -> Unit,
     private val onLives: (Int) -> Unit,
+    private val onStage: (Int) -> Unit,
     private val onOver: (Int, Boolean) -> Unit
 ) : GameLoopView(context) {
 
     override val aspect: Float get() = 1.15f
 
-    private val rows = 5
+    private var rows = 5
     private val cols = 7
-    private val alive = BooleanArray(rows * cols)
+    private var alive = BooleanArray(rows * cols)
+    private var hitPoints = IntArray(rows * cols) { 1 }
+    private var stage = 1
     private val rowColors = intArrayOf(
         Color.parseColor("#FB7185"), Color.parseColor("#FB923C"), Color.parseColor("#FACC15"),
         Color.parseColor("#22C55E"), Color.parseColor("#38BDF8")
@@ -42,18 +45,35 @@ class BrickView(
     private var lives = 3
 
     fun start() {
-        alive.fill(true)
         score = 0
         lives = 3
+        stage = 1
         px = width / 2f
         stuck = true
+        setupStage()
         onScore(0)
         onLives(lives)
         startLoop()
         invalidate()
     }
 
-    private fun speed(): Float = height * minOf(1.0f, 0.62f + score * 0.004f)
+    private fun setupStage() {
+        rows = (4 + stage).coerceAtMost(8)
+        alive = BooleanArray(rows * cols) { index ->
+            val row = index / cols
+            val col = index % cols
+            // Later stages add gaps/patterns, but never remove all reachable bricks.
+            stage == 1 || stage == 2 || (row + col + stage) % 5 != 0
+        }
+        hitPoints = IntArray(rows * cols) { index ->
+            if (alive[index] && stage >= 3 && (index + stage) % 3 == 0) 2 else 1
+        }
+        stuck = true
+        vx = 0f; vy = 0f
+        onStage(stage)
+    }
+
+    private fun speed(): Float = height * (0.58f + (stage - 1) * 0.10f + minOf(0.30f, score * 0.002f)).coerceAtMost(1.28f)
 
     private fun launch() {
         val sp = speed()
@@ -113,16 +133,26 @@ class BrickView(
                 val right = left + bw - 4f
                 val bottom = top + bh
                 if (bx + r > left && bx - r < right && by + r > top && by - r < bottom) {
-                    alive[row * cols + col] = false
-                    score++
-                    onScore(score)
+                    val index = row * cols + col
+                    hitPoints[index]--
+                    if (hitPoints[index] <= 0) {
+                        alive[index] = false
+                        score++
+                        onScore(score)
+                    }
                     val dx = minOf(bx - left, right - bx)
                     val dy = minOf(by - top, bottom - by)
                     if (dx < dy) vx = -vx else vy = -vy
                     if (alive.none { it }) {
-                        stopLoop()
-                        invalidate()
-                        onOver(score, true)
+                        if (stage < 5) {
+                            stage++
+                            setupStage()
+                            onScore(score)
+                        } else {
+                            stopLoop()
+                            invalidate()
+                            onOver(score, true)
+                        }
                     }
                     return
                 }
@@ -158,7 +188,7 @@ class BrickView(
         for (row in 0 until rows) {
             for (col in 0 until cols) {
                 if (!alive[row * cols + col]) continue
-                brickP.color = rowColors[row]
+                brickP.color = if (hitPoints[row * cols + col] > 1) Color.rgb(174, 92, 255) else rowColors[row % rowColors.size]
                 val left = margin + col * bw
                 val top = top0 + row * (bh + 4f)
                 canvas.drawRoundRect(left, top, left + bw - 4f, top + bh, 6f, 6f, paint(Color.argb(65,0,0,0)))
@@ -194,6 +224,7 @@ class BrickActivity : BaseGameActivity() {
     private lateinit var scoreText: TextView
     private lateinit var livesText: TextView
     private lateinit var bestText: TextView
+    private lateinit var stageText: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -209,6 +240,8 @@ class BrickActivity : BaseGameActivity() {
 
         livesText = label("❤️❤️❤️", 20f)
         content.addView(livesText, lp(top = dp(2)))
+        stageText = label("المرحلة: 1 / 5", 17f, R.color.x_color)
+        content.addView(stageText, lp(top = dp(2)))
 
         bestText = label("", 15f, R.color.gold)
         content.addView(bestText, lp(top = dp(2)))
@@ -223,6 +256,7 @@ class BrickActivity : BaseGameActivity() {
                 if (s > 0) Feedback.tap(this)
             },
             { l -> livesText.text = "❤️".repeat(maxOf(l, 0)) + "🖤".repeat(3 - maxOf(l, 0)) },
+            { level -> stageText.text = "المرحلة: $level / 5" },
             { s, won -> onGameOver(s, won) }
         )
         content.addView(game, lp())

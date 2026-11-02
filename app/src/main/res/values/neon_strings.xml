@@ -1,0 +1,22 @@
+<resources>
+    <string name="neon_app_name">NEON</string>
+    <string name="neon_game_left_button">تحرك لليسار</string>
+    <string name="neon_game_settings_button">إيقاف مؤقت</string>
+    <string name="neon_game_hp_indicator">الطاقة</string>
+    <string name="neon_game_right_button">تحرك لليمين</string>
+    <string name="neon_ship">المركبة</string>
+    <string name="neon_enemy">عدو</string>
+    <string name="neon_enemy_laser">ليزر العدو</string>
+    <string name="neon_space_object">صخرة فضائية</string>
+    <string name="neon_booster">معزّز</string>
+    <string name="neon_laser">ليزر المركبة</string>
+    <string name="neon_splash">شعار اللعبة</string>
+    <string name="neon_restart_game_button">إعادة اللعب</string>
+    <string name="neon_resume_game_button">متابعة</string>
+    <string name="neon_exit_game_button">خروج</string>
+    <string name="neon_game_pause_dialog_title">إيقاف مؤقت</string>
+    <string name="neon_game_over_title">انتهت اللعبة</string>
+    <string name="neon_game_over_score">المعادن: %1$s</string>
+    <string name="neon_mineral_content_description">معدن</string>
+    <string name="neon_explosion_content_description">انفجار</string>
+</resources>

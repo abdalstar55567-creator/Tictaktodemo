@@ -26,3 +26,11 @@ IMPORTANT
 - The ZIP paths are relative to the repository root.
 - Existing XO and Memory game Kotlin logic is retained.
 - These are source files, not a prebuilt APK.
+
+اللعبة رقم 100:
+- الداما (CheckersActivity.kt): لعبة داما كلاسيكية للاعبين على الجهاز نفسه.
+- أضيف النشاط إلى AndroidManifest.xml وسجل الألعاب في Games.kt.
+
+تصنيف القائمة الرئيسية:
+- تعرض القائمة المفضلة أولاً إن وجدت، ثم تصنف بقية الألعاب إلى الحركة والمغامرة، العقل والألغاز، الذكاء والذاكرة والتركيز، الأسئلة والمعرفة، السرعة والتحدي، والألعاب الكلاسيكية والاجتماعية.
+- عند إضافة لعبة جديدة، أضف اسم نشاطها إلى المجموعة المناسبة في MenuActivity.kt حتى تظهر ضمن التصنيف الصحيح.

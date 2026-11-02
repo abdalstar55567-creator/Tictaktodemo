@@ -5,13 +5,16 @@ import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
+import android.graphics.LinearGradient
+import android.graphics.Shader
+import android.graphics.Path
 import android.os.Bundle
 import android.view.MotionEvent
 import android.widget.TextView
 import kotlin.math.abs
 import kotlin.random.Random
 
-/** Five distinct touch-first arcade games. No external assets or libraries required. */
+/** Shared touch-first arcade games with hand-drawn Canvas graphics; no external assets required. */
 enum class MotionGame(val title: String, val hint: String) {
     CAR("سباق السيارات", "اسحب يميناً ويساراً لتبديل المسار وتفادي السيارات"),
     PACMAN("متاهة آكل النقاط", "اسحب في اتجاه الحركة واجمع النقاط وابتعد عن الأشباح"),
@@ -35,7 +38,7 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
     private var score = 0; private var over = false; private var started = false; private var elapsed = 0f; private var missedBubbles = 0
     private var playerX = .5f; private var playerY = .82f; private var lane = 1; private var jump = 0f
     private var moveX = 0; private var moveY = 0; private var tick = 0f; private var shotTick = 0f
-    private data class Obj(var x: Float, var y: Float, var type: Int = 0, var alive: Boolean = true)
+    private data class Obj(var x: Float, var y: Float, var type: Int = 0, var alive: Boolean = true, var hp: Int = 1)
     private val objects = mutableListOf<Obj>(); private val bullets = mutableListOf<Obj>()
     private val dots = mutableSetOf<Pair<Int,Int>>(); private val walls = mutableSetOf<Pair<Int,Int>>()
     private val ghosts = mutableListOf<Pair<Int,Int>>(); private val gridW = 9; private val gridH = 12
@@ -63,6 +66,9 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
     }
     private fun endGame() { if (!over) { over=true; stopLoop(); onOver(score); invalidate() } }
     private fun addScore(n:Int=1) { score+=n; onScore(score) }
+    private fun spaceLevel(): Int = (score / 10 + 1).coerceAtMost(10)
+    /** 1 cannon initially, 2 at 10 points, 3 at 25 points. */
+    private fun weaponLevel(): Int = when { score >= 25 -> 3; score >= 10 -> 2; else -> 1 }
     override fun update(dt: Float) {
         if (!started || over) return
         elapsed += dt; tick += dt; shotTick += dt
@@ -76,11 +82,35 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
                 objects.removeAll { if(it.y>1.08f) { if(it.alive) addScore(); true } else false }
             }
             MotionGame.SPACE -> {
-                if (shotTick>.25f) { shotTick=0f; bullets.add(Obj(playerX,.73f)) }
-                if (tick>.55f) { tick=0f; objects.add(Obj(Random.nextFloat()*.84f+.08f,-.06f)) }
-                bullets.forEach { it.y-=.85f*dt }; objects.forEach { it.y+=.28f*dt }
-                for (b in bullets) for (e in objects) if(b.alive&&e.alive&&abs(b.x-e.x)<.06f&&abs(b.y-e.y)<.07f){b.alive=false;e.alive=false;addScore(2)}
-                if(objects.any{it.alive&&it.y>.78f&&abs(it.x-playerX)<.09f}) endGame()
+                val level = spaceLevel()
+                val weapon = weaponLevel()
+                val fireDelay = (0.30f - level * 0.012f).coerceAtLeast(0.13f)
+                if (shotTick > fireDelay) {
+                    shotTick = 0f
+                    val spread = when (weapon) {
+                        1 -> listOf(0f)
+                        2 -> listOf(-.035f, .035f)
+                        else -> listOf(-.055f, 0f, .055f)
+                    }
+                    spread.forEach { offset -> bullets.add(Obj((playerX + offset).coerceIn(.04f,.96f), .75f)) }
+                }
+                val spawnDelay = (0.72f - level * 0.045f).coerceAtLeast(0.28f)
+                if (tick > spawnDelay) {
+                    tick = 0f
+                    val enemyX = Random.nextFloat() * .82f + .09f
+                    // Later levels introduce tougher targets that require multiple hits.
+                    objects.add(Obj(enemyX, -.07f, if (level >= 4 && Random.nextFloat() < .28f) 1 else 0, true, if (level >= 3) 2 else 1))
+                }
+                bullets.forEach { it.y -= (0.88f + level * .035f).coerceAtMost(1.25f) * dt }
+                objects.forEach { it.y += (0.23f + level * .025f).coerceAtMost(.55f) * dt }
+                for (b in bullets) for (e in objects) {
+                    if (b.alive && e.alive && abs(b.x-e.x) < (if (e.type == 1) .075f else .06f) && abs(b.y-e.y) < .075f) {
+                        b.alive = false
+                        e.hp--
+                        if (e.hp <= 0) { e.alive = false; addScore(2 + level) }
+                    }
+                }
+                if(objects.any{it.alive&&it.y>.79f&&abs(it.x-playerX)<.095f}) endGame()
                 bullets.removeAll{!it.alive||it.y<-.1f}; objects.removeAll{!it.alive||it.y>1.1f}
             }
             MotionGame.PACMAN, MotionGame.GHOST, MotionGame.BALL, MotionGame.ESCAPE -> {
@@ -131,18 +161,71 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
         if (elapsed>120f) endGame()
     }
     override fun onDraw(c: Canvas) {
-        val w=width.toFloat(); val h=height.toFloat(); c.drawColor(bg.color)
+        val w=width.toFloat(); val h=height.toFloat()
+        val isMaze = mode==MotionGame.PACMAN || mode==MotionGame.GHOST || mode==MotionGame.BALL || mode==MotionGame.ESCAPE
+        p.shader = LinearGradient(0f,0f,0f,h,
+            if (isMaze) intArrayOf(Color.rgb(8,16,42),Color.rgb(20,32,70),Color.rgb(31,24,67))
+            else intArrayOf(Color.rgb(15,49,91),Color.rgb(61,133,170),Color.rgb(154,206,207)),
+            null,Shader.TileMode.CLAMP)
+        c.drawRect(0f,0f,w,h,p);p.shader=null
+        if (!isMaze && mode != MotionGame.SPACE && mode != MotionGame.CAR && mode != MotionGame.BIKE && mode != MotionGame.RIVER) {
+            val cloud = paint(Color.argb(80,255,255,255))
+            for(i in 0..3){val cx=w*((i*.29f+.12f-elapsed*.008f)%1.2f);val cy=h*(.16f+(i%2)*.09f);c.drawOval(cx-w*.06f,cy-h*.015f,cx+w*.06f,cy+h*.015f,cloud);c.drawCircle(cx,cy-h*.01f,h*.018f,cloud)}
+        }
         when(mode) {
             MotionGame.CAR, MotionGame.BIKE, MotionGame.RIVER -> {
-                c.drawRect(w*.12f,0f,w*.88f,h,road)
-                for(i in 1..2) for(y in 0..8) c.drawRect(w*(.12f+i*.253f)-3f, h*(y/9f)+(elapsed*120%h), w*(.12f+i*.253f)+3f,h*(y/9f)+(elapsed*120%h)+h*.06f,white)
-                objects.forEach{ drawCar(c,it.x*w,it.y*h,w*.12f,if(it.type==1)purple else red) }
-                drawCar(c, w*(lane+.5f)/3f,h*.82f,w*.13f,if(mode==MotionGame.RIVER)cyan else green)
+                // Bright sky, rolling green shoulders, reflective road and animated lane markers.
+                p.shader = LinearGradient(0f,0f,0f,h*.55f,
+                    intArrayOf(Color.rgb(22,78,125),Color.rgb(83,170,196),Color.rgb(195,226,220)),null,Shader.TileMode.CLAMP)
+                c.drawRect(0f,0f,w,h*.55f,p); p.shader = null
+                c.drawRect(0f,h*.35f,w,h,paint(Color.rgb(42,132,79)))
+                val hill = Path().apply { moveTo(0f,h*.43f); cubicTo(w*.22f,h*.27f,w*.35f,h*.47f,w*.53f,h*.36f); cubicTo(w*.73f,h*.25f,w*.86f,h*.45f,w,h*.33f); lineTo(w,h*.57f);lineTo(0f,h*.57f);close() }
+                c.drawPath(hill,paint(Color.rgb(74,158,105)))
+                val roadPath = Path().apply { moveTo(w*.25f,0f); lineTo(w*.75f,0f); lineTo(w*.98f,h); lineTo(w*.02f,h); close() }
+                p.shader = LinearGradient(0f,0f,w,0f,intArrayOf(Color.rgb(35,43,57),Color.rgb(73,83,99),Color.rgb(35,43,57)),null,Shader.TileMode.CLAMP)
+                c.drawPath(roadPath,p); p.shader = null
+                c.drawLine(w*.25f,0f,w*.02f,h,paint(Color.rgb(239,224,178)).apply{strokeWidth=w*.012f})
+                c.drawLine(w*.75f,0f,w*.98f,h,paint(Color.rgb(239,224,178)).apply{strokeWidth=w*.012f})
+                val scroll=(elapsed*0.72f)%0.22f
+                for(i in 0..7){ val y=((i*.22f+scroll)%1.15f)*h; val widthAtY=w*(.012f+.025f*y/h); for(laneMark in 1..2){ val x=w*(.25f+laneMark*.166f)+ (y/h-.5f)*w*.166f; c.drawRoundRect(x-widthAtY,y,x+widthAtY,y+h*(.035f+.025f*y/h),widthAtY,widthAtY,paint(Color.rgb(241,245,249))) } }
+                // Roadside trees pass by to reinforce speed and depth.
+                for(i in 0..5){ val y=((i*.21f+elapsed*.52f)%1.15f)*h; val sideX=w*(if(i%2==0).08f else .92f); val size=w*(.025f+.035f*y/h); c.drawRect(sideX-size*.14f,y,sideX+size*.14f,y+size,paint(Color.rgb(105,68,42))); c.drawCircle(sideX,y,size,paint(Color.rgb(21,101,69))); c.drawCircle(sideX-size*.35f,y+size*.15f,size*.68f,paint(Color.rgb(39,132,79))) }
+                objects.forEach{ obstacle ->
+                    val ox = obstacle.x*w; val oy = obstacle.y*h; val size = w*(.075f+.05f*obstacle.y)
+                    if (mode == MotionGame.BIKE) drawBike(c, ox, oy, size, if(obstacle.type==1)purple else red)
+                    else drawCar(c, ox, oy, size, if(obstacle.type==1)purple else red)
+                }
+                val playerSize=w*.145f
+                c.drawOval(w*(lane+.5f)/3f-playerSize*.45f,h*.87f,w*(lane+.5f)/3f+playerSize*.45f,h*.91f,paint(Color.argb(100,0,0,0)))
+                if (mode == MotionGame.BIKE) drawBike(c, w*(lane+.5f)/3f,h*.82f,playerSize,green)
+                else drawCar(c, w*(lane+.5f)/3f,h*.82f,playerSize,green)
             }
             MotionGame.SPACE -> {
-                for(i in 0..28) c.drawCircle(w*((i*37%97)/100f),h*((i*53%101)/100f),2f,white)
-                objects.forEach{c.drawCircle(it.x*w,it.y*h,w*.035f,red)}; bullets.forEach{c.drawRoundRect(it.x*w-w*.012f,it.y*h,it.x*w+w*.012f,it.y*h+h*.045f,5f,5f,yellow)}
-                val x=playerX*w; val y=.83f*h; val path=android.graphics.Path().apply{moveTo(x,y-h*.07f);lineTo(x-w*.06f,y+h*.04f);lineTo(x,y+h*.01f);lineTo(x+w*.06f,y+h*.04f);close()}; c.drawPath(path,cyan)
+                // Deep space gradient, nebula haze and parallax stars.
+                p.shader = LinearGradient(0f,0f,w,h,intArrayOf(Color.rgb(5,10,34),Color.rgb(25,31,88),Color.rgb(48,20,87)),null,Shader.TileMode.CLAMP)
+                c.drawRect(0f,0f,w,h,p);p.shader=null
+                c.drawCircle(w*.20f,h*.25f,w*.22f,paint(Color.argb(22,90,80,255)))
+                c.drawCircle(w*.83f,h*.45f,w*.28f,paint(Color.argb(18,255,80,160)))
+                for(i in 0..42){val sx=w*((i*37%97)/100f);val sy=((i*53%101)/101f*h+elapsed*h*(.025f+(i%3)*.012f))%h;val r=if(i%5==0)w*.004f else w*.002f;c.drawCircle(sx,sy,r,paint(if(i%4==0)Color.rgb(255,225,155) else Color.WHITE))}
+                objects.forEach{ enemy ->
+                    val x=enemy.x*w;val y=enemy.y*h;val size=w*(if(enemy.type==1).075f else .055f)
+                    val enemyPath=Path().apply{moveTo(x,y+size*.55f);lineTo(x-size*.65f,y-size*.25f);lineTo(x-size*.32f,y-size*.18f);lineTo(x,y-size*.60f);lineTo(x+size*.32f,y-size*.18f);lineTo(x+size*.65f,y-size*.25f);close()}
+                    c.drawPath(enemyPath,paint(if(enemy.type==1)Color.rgb(255,110,145) else Color.rgb(236,76,91)))
+                    c.drawOval(x-size*.28f,y-size*.17f,x+size*.28f,y+size*.08f,paint(Color.rgb(255,205,130)))
+                    if(enemy.hp>1){c.drawRoundRect(x-size*.45f,y-size*.78f,x+size*.45f,y-size*.64f,4f,4f,paint(Color.rgb(255,210,80)))}
+                }
+                bullets.forEach{c.drawRoundRect(it.x*w-w*.009f,it.y*h,it.x*w+w*.009f,it.y*h+h*.045f,5f,5f,paint(Color.rgb(255,236,124)));c.drawCircle(it.x*w,it.y*h,w*.015f,paint(Color.argb(95,90,235,255)))}
+                val x=playerX*w; val y=.84f*h; val shipSize=w*.12f
+                val weapon=weaponLevel()
+                // Engine glow and a polished player ship.
+                c.drawOval(x-shipSize*.22f,y+shipSize*.18f,x+shipSize*.22f,y+shipSize*.72f,paint(Color.argb(130,40,220,255)))
+                val ship=Path().apply{moveTo(x,y-h*.075f);lineTo(x-shipSize*.52f,y+shipSize*.36f);lineTo(x-shipSize*.20f,y+shipSize*.28f);lineTo(x,y+shipSize*.40f);lineTo(x+shipSize*.20f,y+shipSize*.28f);lineTo(x+shipSize*.52f,y+shipSize*.36f);close()}
+                c.drawPath(ship,paint(Color.rgb(46,210,235)))
+                c.drawPath(Path().apply{moveTo(x,y-h*.045f);lineTo(x-shipSize*.16f,y+shipSize*.16f);lineTo(x+shipSize*.16f,y+shipSize*.16f);close()},paint(Color.rgb(194,245,255)))
+                val cannonXs=when(weapon){1->listOf(0f);2->listOf(-shipSize*.28f,shipSize*.28f);else->listOf(-shipSize*.34f,0f,shipSize*.34f)}
+                cannonXs.forEach{dx->c.drawRoundRect(x+dx-shipSize*.045f,y-shipSize*.10f,x+dx+shipSize*.045f,y+shipSize*.20f,shipSize*.025f,shipSize*.025f,paint(Color.rgb(255,195,70)))}
+                p.color=white.color;p.textSize=w*.032f;p.textAlign=Paint.Align.RIGHT
+                c.drawText("المرحلة ${spaceLevel()}  •  ${when(weapon){1->"مدفع واحد";2->"مدفعان";else->"ثلاثة مدافع"}}",w*.96f,h*.12f,p);p.textAlign=Paint.Align.LEFT
             }
             MotionGame.PACMAN, MotionGame.GHOST, MotionGame.BALL, MotionGame.ESCAPE -> {
                 val cell=minOf(w/gridW,h/gridH); val ox=(w-cell*gridW)/2; val oy=(h-cell*gridH)/2
@@ -199,7 +282,23 @@ class MotionArcadeView(context: Context, private val mode: MotionGame, private v
             }
         }
         p.color=white.color;p.textSize=w*.045f;p.textAlign=Paint.Align.LEFT;c.drawText("النقاط: $score",w*.04f,h*.07f,p)
-        if(!started||over){p.color=Color.argb(210,0,0,0);c.drawRoundRect(w*.08f,h*.37f,w*.92f,h*.61f,18f,18f,p);p.color=white.color;p.textAlign=Paint.Align.CENTER;p.textSize=w*.052f;c.drawText(if(over)"انتهت اللعبة — $score" else "المس الشاشة لبدء اللعب",w*.5f,h*.48f,p);p.textSize=w*.032f;c.drawText("${mode.hint}",w*.5f,h*.54f,p)}
+        if(!started||over){p.color=Color.argb(210,0,0,0);c.drawRoundRect(w*.08f,h*.37f,w*.92f,h*.63f,18f,18f,p);p.color=white.color;p.textAlign=Paint.Align.CENTER;p.textSize=w*.052f;c.drawText(if(over)"انتهت اللعبة — $score" else "المس الشاشة لبدء اللعب",w*.5f,h*.47f,p);p.textSize=w*.032f;c.drawText("${mode.hint}",w*.5f,h*.53f,p);if(mode==MotionGame.SPACE){p.textSize=w*.031f;c.drawText("10 نقاط: مدفعان  •  25 نقطة: ثلاثة مدافع",w*.5f,h*.585f,p)}}
+    }
+    private fun drawBike(c: Canvas, x: Float, y: Float, size: Float, body: Paint) {
+        val wheel = paint(Color.rgb(20, 27, 42))
+        val rim = paint(Color.rgb(195, 211, 224))
+        val left = x - size * .34f; val right = x + size * .34f; val cy = y + size * .22f
+        c.drawCircle(left, cy, size * .22f, wheel); c.drawCircle(right, cy, size * .22f, wheel)
+        c.drawCircle(left, cy, size * .12f, rim); c.drawCircle(right, cy, size * .12f, rim)
+        val frame = paint(body.color).apply { style = Paint.Style.STROKE; strokeWidth = size * .075f; strokeCap = Paint.Cap.ROUND }
+        c.drawLine(left, cy, x - size * .05f, y - size * .12f, frame)
+        c.drawLine(x - size * .05f, y - size * .12f, right, cy, frame)
+        c.drawLine(left, cy, right, cy, frame)
+        c.drawLine(x - size * .05f, y - size * .12f, x + size * .10f, y - size * .28f, frame)
+        c.drawLine(x + size * .10f, y - size * .28f, right, cy - size * .04f, frame)
+        c.drawCircle(x, y - size * .34f, size * .13f, paint(Color.rgb(255, 207, 151)))
+        c.drawRoundRect(x - size * .16f, y - size * .23f, x + size * .17f, y + size * .02f, size * .10f, size * .10f, body)
+        c.drawLine(x - size * .02f, y - size * .12f, left, cy, frame)
     }
     private fun drawCar(c:Canvas,x:Float,y:Float,size:Float,body:Paint){
         // Tires, chassis, windshield, reflections and lights give the cars more depth.
@@ -253,9 +352,4 @@ class CarRaceActivity:MotionGameActivity(){override val mode=MotionGame.CAR}
 class PacManActivity:MotionGameActivity(){override val mode=MotionGame.PACMAN}
 class GhostMazeActivity:MotionGameActivity(){override val mode=MotionGame.GHOST}
 class SpaceShooterActivity:MotionGameActivity(){override val mode=MotionGame.SPACE}
-class BikeRaceActivity:MotionGameActivity(){override val mode=MotionGame.BIKE}
-class RiverRunActivity:MotionGameActivity(){override val mode=MotionGame.RIVER}
-class BallMazeActivity:MotionGameActivity(){override val mode=MotionGame.BALL}
-class JungleRunnerActivity:MotionGameActivity(){override val mode=MotionGame.JUNGLE}
-class BubbleCatchActivity:MotionGameActivity(){override val mode=MotionGame.BUBBLES}
 class MazeEscapeActivity:MotionGameActivity(){override val mode=MotionGame.ESCAPE}

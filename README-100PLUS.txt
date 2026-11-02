@@ -34,6 +34,3 @@ IMPORTANT
 تصنيف القائمة الرئيسية:
 - تعرض القائمة المفضلة أولاً إن وجدت، ثم تصنف بقية الألعاب إلى الحركة والمغامرة، العقل والألغاز، الذكاء والذاكرة والتركيز، الأسئلة والمعرفة، السرعة والتحدي، والألعاب الكلاسيكية والاجتماعية.
 - عند إضافة لعبة جديدة، أضف اسم نشاطها إلى المجموعة المناسبة في MenuActivity.kt حتى تظهر ضمن التصنيف الصحيح.
-
-## Shared simple-game backgrounds (visual update)
-Simple activities based on `BaseGameActivity`, plus screens using `Ui.column`, now use `GameBackgroundDrawable` for a lightweight blue-to-aqua gradient and subtle category-themed icon accents. Category selection is inferred from the activity class name. The drawable is generated in Kotlin at runtime and adds no image assets or external dependencies. Larger/custom-rendered game screens are intentionally left unchanged in this pass.

@@ -166,29 +166,35 @@ class MenuActivity : AppCompatActivity() {
         val text = TextView(this).apply {
             this.text = title
             textSize = 17f
-            setTextColor(
-                androidx.core.content.ContextCompat.getColor(
-                    this@MenuActivity,
-                    R.color.text_main
-                )
-            )
+            setTextColor(android.graphics.Color.WHITE)
             setPadding(
-                Ui.dp(this@MenuActivity, 8),
                 Ui.dp(this@MenuActivity, 16),
-                Ui.dp(this@MenuActivity, 8),
-                Ui.dp(this@MenuActivity, 10)
+                Ui.dp(this@MenuActivity, 9),
+                Ui.dp(this@MenuActivity, 16),
+                Ui.dp(this@MenuActivity, 9)
             )
-            gravity = Gravity.CENTER_VERTICAL
+            gravity = Gravity.CENTER
             setTypeface(typeface, android.graphics.Typeface.BOLD)
+            setShadowLayer(2.5f, 0f, Ui.dp(this@MenuActivity, 2).toFloat(), 0x99004488.toInt())
+            background = android.graphics.drawable.GradientDrawable(
+                android.graphics.drawable.GradientDrawable.Orientation.LEFT_RIGHT,
+                intArrayOf(0xFF0878E8.toInt(), 0xFF0752B8.toInt())
+            ).apply {
+                cornerRadius = Ui.dp(this@MenuActivity, 24).toFloat()
+                setStroke(Ui.dp(this@MenuActivity, 2), 0xAAFFFFFF.toInt())
+            }
+            elevation = Ui.dp(this@MenuActivity, 5).toFloat()
         }
 
-        gamesList.addView(
-            text,
-            LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-            )
-        )
+        val titleParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = Gravity.END
+            topMargin = Ui.dp(this@MenuActivity, 13)
+            bottomMargin = Ui.dp(this@MenuActivity, 8)
+        }
+        gamesList.addView(text, titleParams)
     }
 
     private fun addGameGrid(games: List<GameInfo>) {

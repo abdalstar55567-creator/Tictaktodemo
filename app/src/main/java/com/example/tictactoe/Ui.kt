@@ -103,6 +103,7 @@ object Ui {
         c.gravity = Gravity.CENTER_HORIZONTAL
         val p = dp(ctx, 20)
         c.setPadding(p, p, p, p)
+        c.background = GameBackgroundDrawable(ctx, ctx.javaClass.simpleName)
         return c
     }
 

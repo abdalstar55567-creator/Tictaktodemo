@@ -55,7 +55,7 @@ abstract class BaseGameActivity : AppCompatActivity() {
     override fun setContentView(view: View) {
         val root = LinearLayout(this)
         root.orientation = LinearLayout.VERTICAL
-        root.setBackgroundColor(color(R.color.bg))
+        root.background = GameBackgroundDrawable(this, javaClass.simpleName)
 
         val bar = layoutInflater.inflate(R.layout.view_topbar, root, false)
         bar.setPadding(dp(16), dp(12), dp(16), dp(4))

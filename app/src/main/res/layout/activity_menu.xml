@@ -34,24 +34,14 @@
                 android:text="🎮  ✨  🧩"
                 android:textSize="27sp" />
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="178dp"
                 android:layout_marginTop="7dp"
-                android:background="@drawable/bg_menu_logo"
-                android:elevation="5dp"
-                android:paddingStart="24dp"
-                android:paddingTop="4dp"
-                android:paddingEnd="24dp"
-                android:paddingBottom="8dp"
-                android:shadowColor="#995A2600"
-                android:shadowDx="0"
-                android:shadowDy="3"
-                android:shadowRadius="2"
-                android:text="100+"
-                android:textColor="#FFFFFF"
-                android:textSize="48sp"
-                android:textStyle="bold" />
+                android:contentDescription="100+"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:src="@drawable/logo_100plus_glossy" />
 
             <TextView
                 android:layout_width="wrap_content"

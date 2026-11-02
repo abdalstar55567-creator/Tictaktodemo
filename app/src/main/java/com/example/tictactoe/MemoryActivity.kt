@@ -8,6 +8,7 @@ import android.view.Gravity
 import android.widget.Button
 import android.widget.GridLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 
@@ -47,6 +48,10 @@ class MemoryActivity : BaseGameActivity() {
             Feedback.tap(this)
             newGame()
         }
+        findViewById<Button>(R.id.memPause).setOnClickListener {
+            Feedback.tap(this)
+            showPauseDialog()
+        }
 
         newGame()
     }
@@ -78,12 +83,14 @@ class MemoryActivity : BaseGameActivity() {
     }
 
     private fun showBack(card: TextView) {
+        card.setBackgroundResource(R.drawable.bg_memory_card_back)
         card.text = "؟"
         card.setTextSize(TypedValue.COMPLEX_UNIT_SP, 28f)
         card.setTextColor(ContextCompat.getColor(this, R.color.text_dim))
     }
 
     private fun showFront(card: TextView, index: Int) {
+        card.setBackgroundResource(R.drawable.bg_memory_card_front)
         card.text = emojis[values[index]]
         card.setTextSize(TypedValue.COMPLEX_UNIT_SP, 34f)
         card.setTextColor(ContextCompat.getColor(this, R.color.text_main))
@@ -103,7 +110,8 @@ class MemoryActivity : BaseGameActivity() {
             val card = cards[i]
             card.animate().cancel()
             card.rotationY = 0f
-            card.setBackgroundResource(R.drawable.bg_cell)
+            card.setBackgroundResource(R.drawable.bg_memory_card_back)
+            card.elevation = dp(4).toFloat()
             showBack(card)
         }
 
@@ -132,8 +140,8 @@ class MemoryActivity : BaseGameActivity() {
             handler.postDelayed({
                 matched[a] = true
                 matched[i] = true
-                cards[a].setBackgroundResource(R.drawable.bg_cell_match)
-                cards[i].setBackgroundResource(R.drawable.bg_cell_match)
+                cards[a].setBackgroundResource(R.drawable.bg_memory_card_match)
+                cards[i].setBackgroundResource(R.drawable.bg_memory_card_match)
                 pairs++
                 locked = false
                 if (pairs == 8) {
@@ -160,6 +168,26 @@ class MemoryActivity : BaseGameActivity() {
             card.rotationY = -90f
             card.animate().rotationY(0f).setDuration(120).start()
         }.start()
+    }
+
+
+    private fun showPauseDialog() {
+        if (locked) return
+        handler.removeCallbacksAndMessages(null)
+        locked = true
+        AlertDialog.Builder(this)
+            .setTitle("⏸ إيقاف مؤقت")
+            .setMessage("اللعبة متوقفة مؤقتاً. هل تريد المتابعة؟")
+            .setPositiveButton("متابعة") { dialog, _ ->
+                locked = false
+                dialog.dismiss()
+            }
+            .setNegativeButton("لعبة جديدة") { dialog, _ ->
+                dialog.dismiss()
+                newGame()
+            }
+            .setCancelable(false)
+            .show()
     }
 
     private fun finishGame() {

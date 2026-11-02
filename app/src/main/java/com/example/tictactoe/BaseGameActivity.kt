@@ -7,6 +7,7 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
@@ -55,20 +56,30 @@ abstract class BaseGameActivity : AppCompatActivity() {
     override fun setContentView(view: View) {
         val root = LinearLayout(this)
         root.orientation = LinearLayout.VERTICAL
-        root.setBackgroundColor(color(R.color.bg))
+        root.background = GameBackgroundDrawable(this, javaClass.simpleName)
 
         val bar = layoutInflater.inflate(R.layout.view_topbar, root, false)
         bar.setPadding(dp(16), dp(12), dp(16), dp(4))
         root.addView(bar)
 
-        root.addView(
-            view,
-            LinearLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                0,
-                1f
-            )
-        )
+        // Shared glossy 3D frame around the game body. The top bar stays outside;
+        // the play surface and its in-game controls keep their original layout.
+        val boardShell = FrameLayout(this).apply {
+            background = ContextCompat.getDrawable(this@BaseGameActivity, R.drawable.bg_game_board_frame)
+            elevation = dp(8).toFloat()
+            clipToOutline = true
+            setPadding(dp(5), dp(5), dp(5), dp(8))
+        }
+        boardShell.addView(view, FrameLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.MATCH_PARENT
+        ))
+        val boardParams = LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, 0, 1f
+        ).apply {
+            setMargins(dp(9), dp(4), dp(9), dp(10))
+        }
+        root.addView(boardShell, boardParams)
 
         super.setContentView(root)
 
@@ -149,11 +160,18 @@ abstract class BaseGameActivity : AppCompatActivity() {
         val b = Button(this)
         b.text = text
         b.isAllCaps = false
-        b.setTextColor(color(R.color.text_main))
-        b.setBackgroundResource(
-            if (primary) R.drawable.bg_button
-            else R.drawable.bg_button_dim
-        )
+        b.setTextColor(android.graphics.Color.WHITE)
+        b.setShadowLayer(2.5f, 0f, dp(2).toFloat(), 0x99004B86.toInt())
+        b.setBackgroundResource(if (primary) R.drawable.bg_button else R.drawable.bg_button_dim)
+        b.elevation = dp(5).toFloat()
+        b.stateListAnimator = null
+        b.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> view.animate().scaleX(.97f).scaleY(.97f).translationY(dp(2).toFloat()).setDuration(65).start()
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> view.animate().scaleX(1f).scaleY(1f).translationY(0f).setDuration(100).start()
+            }
+            false
+        }
         b.setOnClickListener { onClick() }
 
         return b

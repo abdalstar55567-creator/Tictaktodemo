@@ -64,8 +64,18 @@ object Ui {
         val b = Button(ctx)
         b.text = s
         b.isAllCaps = false
-        b.setTextColor(color(ctx, R.color.text_main))
+        b.setTextColor(android.graphics.Color.WHITE)
+        b.setShadowLayer(2.5f, 0f, dp(ctx, 2).toFloat(), 0x99004B86.toInt())
         b.setBackgroundResource(if (primary) R.drawable.bg_button else R.drawable.bg_button_dim)
+        b.elevation = dp(ctx, 5).toFloat()
+        b.stateListAnimator = null
+        b.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> view.animate().scaleX(.97f).scaleY(.97f).translationY(dp(ctx, 2).toFloat()).setDuration(65).start()
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> view.animate().scaleX(1f).scaleY(1f).translationY(0f).setDuration(100).start()
+            }
+            false
+        }
         val lp = LinearLayout.LayoutParams(MATCH, dp(ctx, height))
         lp.topMargin = dp(ctx, top)
         b.layoutParams = lp
@@ -79,8 +89,18 @@ object Ui {
         b.text = s
         b.isAllCaps = false
         b.setTextSize(TypedValue.COMPLEX_UNIT_SP, 18f)
-        b.setTextColor(color(ctx, R.color.text_main))
+        b.setTextColor(android.graphics.Color.WHITE)
+        b.setShadowLayer(2.5f, 0f, dp(ctx, 2).toFloat(), 0x99004B86.toInt())
         b.setBackgroundResource(if (primary) R.drawable.bg_button else R.drawable.bg_button_dim)
+        b.elevation = dp(ctx, 5).toFloat()
+        b.stateListAnimator = null
+        b.setOnTouchListener { view, event ->
+            when (event.actionMasked) {
+                android.view.MotionEvent.ACTION_DOWN -> view.animate().scaleX(.97f).scaleY(.97f).translationY(dp(ctx, 2).toFloat()).setDuration(65).start()
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> view.animate().scaleX(1f).scaleY(1f).translationY(0f).setDuration(100).start()
+            }
+            false
+        }
         val lp = LinearLayout.LayoutParams(0, dp(ctx, 68), 1f)
         lp.setMargins(dp(ctx, 4), 0, dp(ctx, 4), 0)
         b.layoutParams = lp
@@ -103,6 +123,7 @@ object Ui {
         c.gravity = Gravity.CENTER_HORIZONTAL
         val p = dp(ctx, 20)
         c.setPadding(p, p, p, p)
+        c.background = GameBackgroundDrawable(ctx, ctx.javaClass.simpleName)
         return c
     }
 
@@ -118,7 +139,9 @@ object Ui {
             isAllCaps = false
             textSize = 22f
             setTextColor(color(ctx, R.color.text_main))
-            background = panelBg(ctx, android.graphics.Color.rgb(39, 52, 73), 14)
+            background = ctx.getDrawable(R.drawable.bg_button_dim)
+            elevation = dp(ctx, 4).toFloat()
+            stateListAnimator = null
             minWidth = 0
             minimumWidth = 0
             minHeight = 0

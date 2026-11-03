@@ -26,6 +26,7 @@
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"
             android:configChanges="keyboard|keyboardHidden|orientation|screenSize|screenLayout|smallestScreenSize|uiMode" />
 
+        <activity android:name=".HighScoresActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".AboutActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity
             android:name=".MenuActivity"

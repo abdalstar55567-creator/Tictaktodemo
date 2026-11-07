@@ -61,9 +61,7 @@
         <activity android:name=".HigherLowerActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".OddOneActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".NumberOrderActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".LuckBoxActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".NumberMemoryActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".HurdleRunActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".TowerActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".FlappyActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".CatchActivity" android:exported="false" android:screenOrientation="portrait" />
@@ -72,9 +70,6 @@
         <activity android:name=".MinesweeperActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".LightsOutActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".StopBarActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".CoinFlipActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".DiceDuelActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".OddEvenActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".CapitalQuizActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".AnimalQuizActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".TrueFalseActivity" android:exported="false" android:screenOrientation="portrait" />
@@ -83,57 +78,15 @@
         <activity android:name=".WordScrambleActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".QuickMathActivity" android:exported="false" android:screenOrientation="portrait" />
 
-        <activity android:name=".CarRaceActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BikeRaceActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".TetrisActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".MeteorShootingActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".PacManActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".GhostMazeActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SpaceShooterActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MazeEscapeActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".SokobanActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".HanoiActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".MastermindActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".NimStrategyActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".PegSolitaireActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".RiverCrossingActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".NonogramActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".PipeConnectActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".TargetTapActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".PongSoloActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BasketShotActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".GemCollectorActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BubblePopActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MeteorDodgeActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".JumpRunnerActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MiniGolfActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".MemoryPairsPlusActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".WordSprintActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BallBounceActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".EmojiCountActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".ColorWordActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BiggerNumberActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MathCheckActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MakeTenActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MissingLetterActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".AntonymsActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MemoryEmojiActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".TreasureHuntActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".LuckyWheelActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".CoinCountActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".CrosswalkActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".MagnetActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".ClockReadActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".OddWordActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BeeFlowerActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".BalanceScaleActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".WeatherQuizActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".ArcheryActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".NumberLadderActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".LetterColoringActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".EyesightChallengeActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".PicturePuzzleActivity" android:exported="false" android:screenOrientation="portrait" />
-        <activity android:name=".FixedGoalFootballActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".DuckHuntActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".SudokuActivity" android:exported="false" android:screenOrientation="portrait" />
         <activity android:name=".FrogHopActivity" android:exported="false" android:screenOrientation="portrait" />

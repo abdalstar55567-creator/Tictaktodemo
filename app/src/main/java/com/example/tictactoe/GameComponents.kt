@@ -49,7 +49,7 @@ object GameComponents {
             gravity = Gravity.CENTER
             maxLines = 2
             setLineSpacing(0f, 0.96f)
-            setTextColor(0xFFFFFFFF.toInt())
+            setTextColor(0xFFFFF1C2.toInt())
             setTypeface(typeface, Typeface.BOLD)
             includeFontPadding = false
             setShadowLayer(3f, 0f, Ui.dp(context, 2).toFloat(), 0x99000000.toInt())
